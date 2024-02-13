@@ -24,7 +24,7 @@ export default component$(() => {
     <>
       
       <div class="flex gap-5">
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto flex flex-col gap-2 pb-5">
           {users.value.length > 0 ? (
             users.value.map((user) => (
               <Card key={user.id}>
