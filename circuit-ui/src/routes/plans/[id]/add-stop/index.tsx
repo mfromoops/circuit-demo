@@ -19,6 +19,9 @@ import { TextField } from "~/components/ui/Fields";
 import { Button, Card, CardHeading } from "~/components/ui/UIComponents";
 import { useUserList } from "~/routes/layout";
 
+type UsePlanType = ReturnType<typeof usePlan>;
+type UserUsersListType = ReturnType<typeof useUserList>;
+
 export const usePlan = routeLoader$(async ({ env, url }) => {
   const id = url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
@@ -73,9 +76,6 @@ export const useAddStop = routeAction$(async (body, { env, url }) => {
     return null;
   }
 });
-
-type UsePlanType = ReturnType<typeof usePlan>;
-type UserUsersListType = ReturnType<typeof useUserList>;
 
 export default component$(() => {
   const plan = usePlan();
