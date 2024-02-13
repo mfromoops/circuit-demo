@@ -2,9 +2,9 @@ import { QwikIntrinsicElements, Slot, component$ } from "@builder.io/qwik";
 import { ClassNameValue, twMerge } from "tailwind-merge";
 import { cn } from "~/utils";
 
-export const Card = component$(() => {
+export const Card = component$((props: QwikIntrinsicElements['div']) => {
   return (
-    <div class="flex flex-col rounded-xl border bg-white bg-clip-border text-gray-700 shadow-md">
+    <div class={cn("flex flex-col rounded-xl border bg-white bg-clip-border text-gray-700 shadow-md", props.class)}>
       <div class="p-6">
         <Slot />
       </div>

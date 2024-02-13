@@ -5,6 +5,14 @@ export type Address = {
   zip: string;
 };
 
+export type UserAddress = {
+  id: string;
+  addressLineOne?: string;
+  addressLineTwo?: string;
+  latitute?: number;
+  longitude?: number;
+}
+
 export type MapsResults = {
   results: {
     geometry: {

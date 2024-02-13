@@ -1,5 +1,5 @@
 import { component$ } from "@builder.io/qwik";
-import { Form, routeAction$, routeLoader$ } from "@builder.io/qwik-city";
+import { Form, routeAction$, routeLoader$, useNavigate } from "@builder.io/qwik-city";
 import { UserModel } from "~/business-logic/types";
 import { TextField } from "~/components/ui/Fields";
 import { Button, Card, CardHeading } from "~/components/ui/UIComponents";
@@ -20,6 +20,7 @@ export const useCreateUser = routeAction$(async (data, { env, json }) => {
 export default component$(() => {
   const users = useUserList();
   const createUser = useCreateUser();
+  const nav = useNavigate();
   return (
     <>
       
@@ -29,10 +30,19 @@ export default component$(() => {
             users.value.map((user) => (
               <Card key={user.id}>
                 <CardHeading>{user.name}</CardHeading>
-                <div>
+                <div 
+                class="cursor-pointer"
+                onClick$={() => {
+                  nav(user.id)
+                  }}>
                   <p>{user.email}</p>
                   <p>{user.addressLineOne}</p>
                   <p>{user.addressLineTwo}</p>
+                  {user.latitute && user.longitude && (
+                      <p>
+                        {user.latitute}, {user.longitude}
+                      </p>
+                    )}
                 </div>
               </Card>
             ))

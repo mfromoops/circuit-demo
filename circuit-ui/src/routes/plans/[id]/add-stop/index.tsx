@@ -42,22 +42,68 @@ export const useSearch = routeAction$(async ({ query }, { env, url }) => {
   return plans;
 });
 
-export const useAddStop = routeAction$(async (body, { env, url }) => {
-  const { addressLineOne, addressLineTwo, recipient } = body as {
-    addressLineOne: string;
-    addressLineTwo: string;
-    recipient?: {
-      name: string;
-      email: string;
-    }
-  };
+export const useAddByCoordinates = routeAction$(async (body, { env, url }) => {
+  const { latitude, longitude } = body as { latitude: string; longitude: string };
+  const address = {
+    latitude: parseFloat(latitude),
+    longitude: parseFloat(longitude),
+  }
+  console.log("body", body)
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const planId = url.pathname.split("/")[2];
   try {
     const plan = await circuitsAPI.createStop(
       {
-        address: { addressLineOne, addressLineTwo },
+        address,
+        orderInfo: {
+          products: ["product1", "product2"],
+          sellerName: "seller",
+          sellerOrderId: "order",
+        },
+        recipient: {
+          name: "name",
+          email: "email",
+        },
+        packageCount: 1,
+        activity: "delivery",
+        notes: "note",
+      },
+      `plans/${planId}`,
+    );
+    console.log(plan)
+    return plan;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+});
+
+export const useAddStop = routeAction$(async (body, { env, url }) => {
+  const stopBody = body as {
+    addressLineOne: string;
+    addressLineTwo: string;
+    latitute?: string;
+    longitude?: string;
+    recipient?: {
+      name: string;
+      email: string;
+    }
+  };
+  
+  const { addressLineOne, addressLineTwo,  recipient } = stopBody;
+  const latitude = stopBody.latitute ? parseFloat(stopBody.latitute) : undefined;
+  const longitude = stopBody.longitude ? parseFloat(stopBody.longitude) : undefined;
+  const apiKey = env.get("CIRCUIT_API_KEY");
+  const circuitsAPI = new CircuitAPI(apiKey as string);
+  const planId = url.pathname.split("/")[2];
+  console.log("body", body)
+  console.log(latitude, longitude)
+  const address = latitude && longitude ? {latitude, longitude} : {addressLineOne, addressLineTwo}
+  try {
+    const plan = await circuitsAPI.createStop(
+      {
+        address,
         orderInfo: {
           products: ["product1", "product2"],
           sellerName: "seller",
@@ -81,7 +127,7 @@ export default component$(() => {
   const plan = usePlan();
   const users = useUserList();
   const activeTab: Signal<"search" | "user" | "coordinates"> =
-    useSignal("coordinates");
+    useSignal("user");
   return (
     <>
       <Tabs acitveTab={activeTab}></Tabs>
@@ -226,6 +272,8 @@ export const Users = component$((props: { users: UserUsersListType }) => {
               .submit({
                 addressLineOne: user.addressLineOne,
                 addressLineTwo: user.addressLineTwo,
+                latitute: user.latitute,
+                longitude: user.longitude,
                 recipient: {
                   name: user.name,
                   email: user.email,
@@ -247,6 +295,11 @@ export const Users = component$((props: { users: UserUsersListType }) => {
             <div class="ml-1">{user.email}</div>
             <div class="ml-1">{user.addressLineOne}</div>
             <div class="ml-1">{user.addressLineTwo}</div>
+            {user.latitute && user.longitude && (
+              <div class="ml-1">
+                {user.latitute}, {user.longitude}
+              </div>
+            )}
           </a>
         </li>
       ))}
@@ -255,10 +308,11 @@ export const Users = component$((props: { users: UserUsersListType }) => {
 });
 
 export const Coordinates = component$(() => {
+  const addByCoordinates = useAddByCoordinates();
   return (
     <div class="mt-5">
       <div class="mx-5 p-5 shadow-md">
-        <Form class="grid gap-2">
+        <Form class="grid gap-2" action={addByCoordinates}>
           <TextField label="Latitude" inputName="latitude" />
           <TextField label="Longitude" inputName="longitude" />
           <Button type="submit" class="bg-green-500">

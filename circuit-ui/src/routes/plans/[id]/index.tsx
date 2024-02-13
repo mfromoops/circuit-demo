@@ -78,7 +78,6 @@ export default component$(() => {
             {stop.address.addressLineTwo}
           </h2>
           {/* <h2>{stop.title}</h2> */}
-          <p>{stop.id}</p>
           {/* <p>{stop.address}</p> */}
           {/* <p>{stop.lat}, {stop.lng}</p> */}
         </a>  

@@ -6,4 +6,6 @@ export type UserModel = {
     email: string;
     addressLineOne: string;
     addressLineTwo: string;
+    latitute: number;
+    longitude: number;
   };

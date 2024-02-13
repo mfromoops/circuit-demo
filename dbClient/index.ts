@@ -1,4 +1,3 @@
-import { Database } from "bun:sqlite";
 import { Hono } from "hono";
 import { db, type UserWithAddress } from "./init";
 const app = new Hono();
@@ -11,6 +10,32 @@ app.get('/users', async (c) => {
         }
     });
 });
+app.get('/users/:id', async (c) => {
+    const id = await c.req.path.split('/')[2];
+    const user = (await db.prepare('SELECT * FROM users WHERE id = ?').get(id)) as UserWithAddress;
+    const addresses = (await db.prepare('SELECT * FROM address_book WHERE user_id = ?').all(id));
+    return new Response(JSON.stringify({
+        user,
+        addresses
+    }), {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+});
+
+app.post('/users/:id/address', async (c) => {   
+    const id = await c.req.path.split('/')[2];
+    const address: {addressLineOne: string, addressLineTwo: string, latitute: string, longitude: string} = await c.req.json();
+    console.log(address)
+    const query = await db.prepare('INSERT INTO address_book (user_id, addressLineOne, addressLineTwo, latitute, longitude) VALUES (?, ?, ?, ?, ?)').all(id, address.addressLineOne, address.addressLineTwo, address.latitute, address.longitude);
+    console.log(query)
+    return new Response('Address added', {
+        headers: {
+            'Content-Type': 'text/plain'
+        }
+    });
+});
 
 app.post('/users', async (c) => {
     const user: UserWithAddress = await c.req.json();
@@ -20,7 +45,7 @@ app.post('/users', async (c) => {
 });
 
 app.get('/address-book', async (c) => {
-    const address = await db.prepare('SELECT u.*, ab.addressLineOne, ab.addressLineTwo FROM address_book as ab inner join users as u on ab.user_id = u.id').all();
+    const address = await db.prepare('SELECT u.*, ab.addressLineOne, ab.addressLineTwo, ab.latitute, ab.longitude FROM address_book as ab inner join users as u on ab.user_id = u.id').all();
     return new Response(JSON.stringify(address ?? []), {
         headers: {
             'Content-Type': 'application/json'
