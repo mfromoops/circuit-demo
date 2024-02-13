@@ -1,4 +1,11 @@
-import { $, Signal, component$, useSignal, useTask$, useVisibleTask$ } from "@builder.io/qwik";
+import {
+  $,
+  Signal,
+  component$,
+  useSignal,
+  useTask$,
+  useVisibleTask$,
+} from "@builder.io/qwik";
 import {
   routeLoader$,
   routeAction$,
@@ -33,16 +40,31 @@ export const useSearch = routeAction$(async ({ query }, { env, url }) => {
 });
 
 export const useAddStop = routeAction$(async (body, { env, url }) => {
-  const { addressLineOne, addressLineTwo } = body as {
+  const { addressLineOne, addressLineTwo, recipient } = body as {
     addressLineOne: string;
     addressLineTwo: string;
+    recipient?: {
+      name: string;
+      email: string;
+    }
   };
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const planId = url.pathname.split("/")[2];
   try {
     const plan = await circuitsAPI.createStop(
-      { address: { addressLineOne, addressLineTwo } },
+      {
+        address: { addressLineOne, addressLineTwo },
+        orderInfo: {
+          products: ["product1", "product2"],
+          sellerName: "seller",
+          sellerOrderId: "order",
+        },
+        recipient,
+        packageCount: 1,
+        activity: "delivery",
+        notes: "note",
+      },
       `plans/${planId}`,
     );
     return plan;
@@ -67,15 +89,16 @@ export default component$(() => {
       {activeTab.value === "user" && <Users users={users}></Users>}
       {activeTab.value === "coordinates" && <Coordinates></Coordinates>}
     </>
-  ) 
+  );
 });
 
-const SearchForm = component$((props: {plan: UsePlanType}) => {
+const SearchForm = component$((props: { plan: UsePlanType }) => {
   const search = useSearch();
   const addStop = useAddStop();
   const nav = useNavigate();
-  return !addStop.isRunning ? (<>
-  <Form action={search} class="mx-5 mt-5 grid rounded-md p-5 shadow-md">
+  return !addStop.isRunning ? (
+    <>
+      <Form action={search} class="mx-5 mt-5 grid rounded-md p-5 shadow-md">
         <input type="text" name="query" class="border" />
         <button type="submit">Search</button>
       </Form>
@@ -99,8 +122,9 @@ const SearchForm = component$((props: {plan: UsePlanType}) => {
             <p>{sug.addressLineTwo}</p>
           </div>
         ))}
-  </>) : (
-    <div class="mx-auto w-72 text-center mt-5">
+    </>
+  ) : (
+    <div class="mx-auto mt-5 w-72 text-center">
       <Card>
         <CardHeading>Adding Stop</CardHeading>
       </Card>
@@ -115,7 +139,7 @@ export const Tabs = component$(
         <div class="relative right-0">
           <ul
             class={
-              "bg-blue-gray-50/60 relative flex list-none flex-wrap rounded-xl p-1"
+              "relative flex list-none flex-wrap rounded-xl bg-blue-gray-50/60 p-1"
             }
             data-tabs="tabs"
             role="list"
@@ -126,12 +150,12 @@ export const Tabs = component$(
                 "z-30 flex-auto select-none text-center",
                 props.acitveTab.value === "search"
                   ? "rounded-full bg-black text-white"
-                  : ""
+                  : "",
               ])}
             >
               <a
                 href="#search"
-                class="z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1 text-slate-700"
+                class="text-slate-700 z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1"
                 data-tab-target=""
                 role="tab"
                 aria-selected="true"
@@ -144,13 +168,13 @@ export const Tabs = component$(
                 "z-30 flex-auto select-none text-center",
                 props.acitveTab.value === "user"
                   ? "rounded-full bg-black text-white"
-                  : ""
+                  : "",
               ])}
               onClick$={() => (props.acitveTab.value = "user")}
             >
               <a
                 href="#user"
-                class="z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1 text-slate-700"
+                class="text-slate-700 z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1"
                 data-tab-target=""
                 role="tab"
                 aria-selected="false"
@@ -163,13 +187,13 @@ export const Tabs = component$(
                 "z-30 flex-auto select-none text-center",
                 props.acitveTab.value === "coordinates"
                   ? "rounded-full bg-black text-white"
-                  : ""
+                  : "",
               ])}
               onClick$={() => (props.acitveTab.value = "coordinates")}
             >
               <a
                 href="#coordinates"
-                class="z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1 text-slate-700"
+                class="text-slate-700 z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1"
                 data-tab-target=""
                 role="tab"
                 aria-selected="false"
@@ -184,37 +208,49 @@ export const Tabs = component$(
   },
 );
 
-export const Users = component$((props: {users: UserUsersListType}) => {
+export const Users = component$((props: { users: UserUsersListType }) => {
+  const addStop = useAddStop();
+  const nav = useNavigate();
+  const plan = usePlan();
   return (
-        <ul
-          class={
-            "flex flex-col list-none flex-wrap rounded-xl p-1 mt-5 mx-5 gap-2"
-          }
-          data-tabs="tabs"
-          role="list"
+    <ul
+      class={"mx-5 mt-5 flex list-none flex-col flex-wrap gap-2 rounded-xl p-1"}
+      data-tabs="tabs"
+      role="list"
+    >
+      {props.users.value.map((user) => (
+        <li
+          class="z-30 flex-auto select-none bg-blue-gray-50/60 text-center"
+          onClick$={() => {
+            addStop
+              .submit({
+                addressLineOne: user.addressLineOne,
+                addressLineTwo: user.addressLineTwo,
+                recipient: {
+                  name: user.name,
+                  email: user.email,
+                }
+              })
+              .then((res) => {
+                nav("/" + plan.value.id);
+              });
+          }}
         >
-          {props.users.value.map((user) => (
-            <li
-              class="z-30 flex-auto select-none text-center bg-blue-gray-50/60"
-              onClick$={() => {
-
-              }}
-            >
-              <a
-                href="#search"
-                class="z-30 mb-0 flex flex-col w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1 text-slate-700"
-                data-tab-target=""
-                role="tab"
-                aria-selected="true"
-              >
-                <div class="ml-1">{user.name}</div>
-                <div class="ml-1">{user.email}</div>
-                <div class="ml-1">{user.addressLineOne}</div>
-                <div class="ml-1">{user.addressLineTwo}</div>
-              </a>
-            </li>
-          ))}
-        </ul>
+          <a
+            href="#search"
+            class="text-slate-700 z-30 mb-0 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1"
+            data-tab-target=""
+            role="tab"
+            aria-selected="true"
+          >
+            <div class="ml-1">{user.name}</div>
+            <div class="ml-1">{user.email}</div>
+            <div class="ml-1">{user.addressLineOne}</div>
+            <div class="ml-1">{user.addressLineTwo}</div>
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 });
 
@@ -225,7 +261,9 @@ export const Coordinates = component$(() => {
         <Form class="grid gap-2">
           <TextField label="Latitude" inputName="latitude" />
           <TextField label="Longitude" inputName="longitude" />
-          <Button type="submit" class="bg-green-500">Search</Button>
+          <Button type="submit" class="bg-green-500">
+            Search
+          </Button>
         </Form>
       </div>
     </div>
