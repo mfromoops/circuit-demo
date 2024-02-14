@@ -58,7 +58,7 @@ export class DirectusClient {
         ],
         filter: {
           client_paid: {
-            _eq: false,
+            _eq: true,
           },
         },
       }),
