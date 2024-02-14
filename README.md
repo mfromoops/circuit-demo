@@ -6,7 +6,10 @@ To run this project you'll need to have Bun 1.0.26 or greater as well as an API 
 If you are on Windows, you'll need to use WSl to run bun, since the Windows Release is not stable yet (as of Feb 12, 2024).
 ## Spin up your local environment
 Once you get your API token from Circuit, you'll need to ad a .env file inside the circuit-ui folder with the following content
-```CIRCUIT_API_KEY=<YOUR_TOKEN_HERE```
+```env
+CIRCUIT_API_KEY=<YOUR_TOKEN_HERE>
+DIRECTUS_TOKEN=<YOUR_TOKEN_HERE>
+```
 ### Running the DB Client
 1. cd into the dbClient folder
 2. Run `bun install`
