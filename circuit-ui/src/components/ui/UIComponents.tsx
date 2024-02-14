@@ -22,7 +22,7 @@ export const CardHeading = component$(() => {
 
 export const Button = component$(
   (props: QwikIntrinsicElements['button']) => {
-    const classes = twMerge('select-none rounded-lg bg-gray-900 px-6 py-3 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"', 'p-3 bg-[#B91C1C]', props.class as ClassNameValue)
+    const classes = twMerge('select-none rounded-lg bg-gray-900 px-6 py-3 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"', 'p-3 bg-[#B91C1C]', props.class as ClassNameValue, props.disabled ? 'opacity-50 shadow-none pointer-events-none' : '')
 
     return (
       <button

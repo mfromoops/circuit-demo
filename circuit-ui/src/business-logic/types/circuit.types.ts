@@ -22,7 +22,8 @@ export type ListPlansResponse = {
     writable: boolean;
     optimization: string;
     drivers: DriverObject[];
-  })[]
+  })[],
+  nextPageToken: string;
 }
 export type RouteResponse = {
   id: string;
