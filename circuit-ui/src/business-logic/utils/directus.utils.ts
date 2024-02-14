@@ -52,7 +52,13 @@ export class DirectusClient {
         fields: [
           "id",
           { client: ["name", "last_names"] },
-          { order: ['pickup_location', 'delivery_location', { store_id: ["name", "address", "town"] }] },
+          {
+            order: [
+              "pickup_location",
+              "delivery_location",
+              { store_id: ["name", "address", "town"] },
+            ],
+          },
           "order_total",
           "client_paid",
         ],
