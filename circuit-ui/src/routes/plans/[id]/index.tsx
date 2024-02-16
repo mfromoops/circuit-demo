@@ -47,9 +47,14 @@ export default component$(() => {
       <Link href="/">Back</Link>
       </Button>
       <h1 class="text-center text-lg">Circuit Stops</h1>
+      <div class="flex gap-2">
       <Button type="button" class="bg-green-500">
       <Link href={`add-stop`} >Add Stop</Link>
       </Button>
+      <Button type="button" class="bg-blue-500">
+      <Link href={`add-drivers`} >Add Drivers</Link>
+      </Button>
+      </div>
     </div>
       <div class="grid gap-2 px-5">
         <div class="bg-white p-2 shadow-md">

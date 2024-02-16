@@ -17,8 +17,11 @@ export type OrderInfo = {
   planId: string | null | undefined;
 };
 export type Client = {
+  id: string;
   name: string;
   last_names: string;
+  email: string;
+  phone_number: string;
 };
 
 export type Order = {
@@ -64,13 +67,13 @@ export class DirectusClient {
       readItems("order_info", {
         fields: [
           "id",
-          { client: ["name", "last_names"] },
+          { client: ["name", "last_names", "id", "email", "phone_number"] },
           {
             order: [
               "Order_id",
               "pickup_location",
               "delivery_location",
-              { store_id: ["name", "address", "town"] },
+              { store_id: ["name", "address", "town", "store_id"] },
             ],
           },
           "order_total",

@@ -1,5 +1,5 @@
 import { BasicAuthentication } from ".";
-import type { PlanObject, ListPlansResponse, StopObject, getPlanResponse as GetPlanResponse, RouteResponse, ListStopsResponse } from "../types";
+import type { PlanObject, ListPlansResponse, StopObject, getPlanResponse as GetPlanResponse, RouteResponse, ListStopsResponse, DriverObject, DriverListResponse } from "../types";
 
 export class CircuitAPI {
   constructor(private apiKey: string) {}
@@ -60,6 +60,27 @@ export class CircuitAPI {
       body: JSON.stringify(stops),
     }).then((res) => res.json());
   }
+  listDrivers(): Promise<DriverListResponse> {
+    return fetch("https://api.getcircuit.com/public/v0.2b/drivers", {
+      method: "GET",
+      headers: {
+        Authorization: BasicAuthentication(this.apiKey, ""),
+        "Content-Type": "application/json",
+      },
+    }).then((res) => res.json());
+  }
+  listPlanDrivers(planId: `plans/${string}`): Promise<DriverListResponse> {
+    return fetch(`https://api.getcircuit.com/public/v0.2b/${planId}`, {
+      method: "GET",
+      headers: {
+        Authorization: BasicAuthentication(this.apiKey, ""),
+        "Content-Type": "application/json",
+      },
+    }).then((res) => res.json()).then(res=> {
+      const drivers = res.drivers;
+      return {drivers, nextPageToken: null}
+    })
+  }
   listPlans(token?: string): Promise<ListPlansResponse> {
     return fetch(`https://api.getcircuit.com/public/v0.2b/plans${token?'?pageToken='+token:''}`, {
       method: "GET",
@@ -107,4 +128,17 @@ export class CircuitAPI {
       },
     }).then((res) => res.json());
   }
+  updatePlan(drivers: `drivers/${string}`[], planID: `plans/${string}`) {
+    return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: BasicAuthentication(this.apiKey, ""),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        drivers,
+      }),
+    }).then((res) => res.json());
+  }
+
 }

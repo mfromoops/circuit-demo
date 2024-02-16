@@ -14,6 +14,10 @@ export type DriverObject = {
   phone: string;
   active: boolean;
 }
+export type DriverListResponse = {
+  drivers: DriverObject[]
+  nextPageToken: string | null;
+}
 export type ListPlansResponse = {
   plans: (PlanObject & {
     id: string;
