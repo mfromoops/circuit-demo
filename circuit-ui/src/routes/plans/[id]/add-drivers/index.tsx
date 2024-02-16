@@ -1,5 +1,5 @@
 import { component$, useSignal } from "@builder.io/qwik";
-import { routeAction$, routeLoader$ } from "@builder.io/qwik-city";
+import { routeAction$, routeLoader$, useNavigate } from "@builder.io/qwik-city";
 import { DriverObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import { Button } from "~/components/ui/UIComponents";
@@ -35,16 +35,19 @@ export const useAddDrivers = routeAction$(async (body, context) => {
 export default component$(() => {
   const drivers = useListDrivers();
   const manageDrivers = useAddDrivers();
+  const nav = useNavigate();
   const selectedDrivers = useSignal<DriverObject[]>(drivers.value.activeDrivers.drivers);
   return (
     <>
-      <div class="flex flex-row-reverse mx-5">
+      <div class="flex m-5">
         <button
-          onClick$={() => manageDrivers.submit()}
+          onClick$={() => 
+            nav(`/plans/${location.pathname.split("/")[2]}`)
+          }
 
-          class="rounded-md bg-blue-500 p-2 text-white"
+          class="rounded-md bg-gray-500 p-2 px-5 text-white"
         >
-          Add Drivers
+          Back
         </button>
       </div>
       <div class="grid grid-cols-2 gap-5 px-5">
