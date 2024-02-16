@@ -18,7 +18,18 @@ export const useCircuit = routeLoader$(async ({ env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const resp = await circuitsAPI.listPlans(token as string);
-  return resp;
+  let nextPageToken = resp.nextPageToken;
+  while(nextPageToken) {
+    const next = await circuitsAPI.listPlans(nextPageToken);
+    resp.plans = resp.plans.concat(next.plans);
+    nextPageToken = next.nextPageToken;
+  }
+  let plans = resp.plans.sort((a, b) => {
+    const aDate = new Date(a.starts.year, a.starts.month, a.starts.day);
+    const bDate = new Date(b.starts.year, b.starts.month, b.starts.day);
+    return bDate.getTime() - aDate.getTime();
+  });
+  return {plans, nextPageToken};
 });
 
 export const useCreatePlan = routeAction$(async (data, { env, json }) => {
@@ -89,7 +100,9 @@ export default component$(() => {
             plans.value.plans.map((plan) => (
               <Link href={plan.id} key={plan.id} class="bg-white p-2 shadow-md">
                 <h2>{plan.title}</h2>
-                <p>{plan.id}</p>
+                <p>
+                  {plan.starts.day}/{plan.starts.month}/{plan.starts.year}
+                </p>
                 <p>{plan.drivers.map((d) => d.email).join(", ")}</p>
               </Link>
             ))}
