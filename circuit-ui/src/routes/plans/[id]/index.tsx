@@ -1,10 +1,9 @@
 import { component$ } from "@builder.io/qwik";
 import {
+  Link,
+  routeAction$,
   routeLoader$,
   type DocumentHead,
-  routeAction$,
-  Form,
-  Link,
 } from "@builder.io/qwik-city";
 import { CircuitAPI } from "~/business-logic/utils";
 import { Button } from "~/components/ui/UIComponents";
@@ -22,34 +21,29 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
   return newPlan;
 });
 
-export const useDistributePlan = routeAction$(
-  async ({ optimization }, { env, url }) => {
-    const id = url.pathname.split("/")[2];
-    const apiKey = env.get("CIRCUIT_API_KEY");
-    const circuitsAPI = new CircuitAPI(apiKey as string);
-    let plan = await circuitsAPI.getPlan(`plans/${id}`);
-    await circuitsAPI.distributePlan(`plans/${id}`);
-    while (!plan.distributed) {
-      console.log("trying");
-      await new Promise((res) => setTimeout(res, 1500));
-      plan = await circuitsAPI.getPlan(`plans/${id}`);
-    }
-    return plan;
-  },
-);
+export const useDistributePlan = routeAction$(async ({}, { env, url }) => {
+  const id = url.pathname.split("/")[2];
+  const apiKey = env.get("CIRCUIT_API_KEY");
+  const circuitsAPI = new CircuitAPI(apiKey as string);
+  let plan = await circuitsAPI.getPlan(`plans/${id}`);
+  await circuitsAPI.distributePlan(`plans/${id}`);
+  while (!plan.distributed) {
+    await new Promise((res) => setTimeout(res, 1500));
+    plan = await circuitsAPI.getPlan(`plans/${id}`);
+  }
+  return plan;
+});
 
-const useOptimizePlan = routeAction$(async (data, { env, url }) => {
+const useOptimizePlan = routeAction$(async ({}, { env, url }) => {
   const id = url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   await circuitsAPI.optimizePlan(`plans/${id}`);
   let plan = await circuitsAPI.getPlan(`plans/${id}`);
   while (plan.optimization === "creating") {
-    console.log("trying");
     await new Promise((res) => setTimeout(res, 1500));
     plan = await circuitsAPI.getPlan(`plans/${id}`);
   }
-  console.log("solved");
   return plan;
 });
 
@@ -59,11 +53,13 @@ export default component$(() => {
   const optimizePlan = useOptimizePlan();
   return (
     <>
-        <h1 class="text-center text-lg w-full border">Circuit Stops</h1>
+      <h1 class="w-full border text-center text-lg">Circuit Stops</h1>
       <div class="mb-5 flex justify-between px-5">
-        <Button type="button" class="bg-gray-500">
-          <Link href="/">Back</Link>
-        </Button>
+        <Link href="/">
+          <Button type="button" class="bg-gray-500">
+            Back
+          </Button>
+        </Link>
         {plan.value.optimization === "creating" && (
           <div class="flex gap-2">
             <Link href={`add-stop`}>
@@ -117,9 +113,6 @@ export default component$(() => {
               </span>
             </div>
             <h2>{stop.address.addressLineTwo}</h2>
-            {/* <h2>{stop.title}</h2> */}
-            {/* <p>{stop.address}</p> */}
-            {/* <p>{stop.lat}, {stop.lng}</p> */}
           </a>
         ))}
       </div>

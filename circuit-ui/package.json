@@ -41,6 +41,7 @@
   "dependencies": {
     "@directus/sdk": "^15.0.0",
     "@material-tailwind/html": "^2.2.2",
+    "axios": "^1.6.7",
     "bun": "^1.0.26",
     "clsx": "^2.1.0",
     "flowbite": "^2.2.1",
