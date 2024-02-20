@@ -17,10 +17,8 @@ import { twMerge } from "tailwind-merge";
 import { CircuitAPI } from "~/business-logic/utils";
 import { TextField } from "~/components/ui/Fields";
 import { Button, Card, CardHeading } from "~/components/ui/UIComponents";
-import { useUserList } from "~/routes/layout";
 
 type UsePlanType = ReturnType<typeof usePlan>;
-type UserUsersListType = ReturnType<typeof useUserList>;
 
 export const usePlan = routeLoader$(async ({ env, url }) => {
   const id = url.pathname.split("/")[2];
@@ -125,14 +123,12 @@ export const useAddStop = routeAction$(async (body, { env, url }) => {
 
 export default component$(() => {
   const plan = usePlan();
-  const users = useUserList();
-  const activeTab: Signal<"search" | "user" | "coordinates"> =
-    useSignal("user");
+  const activeTab: Signal<"search" | "coordinates"> =
+    useSignal("search");
   return (
     <>
       <Tabs acitveTab={activeTab}></Tabs>
       {activeTab.value === "search" && <SearchForm plan={plan}></SearchForm>}
-      {activeTab.value === "user" && <Users users={users}></Users>}
       {activeTab.value === "coordinates" && <Coordinates></Coordinates>}
     </>
   );
@@ -179,7 +175,7 @@ const SearchForm = component$((props: { plan: UsePlanType }) => {
 });
 
 export const Tabs = component$(
-  (props: { acitveTab: Signal<"search" | "user" | "coordinates"> }) => {
+  (props: { acitveTab: Signal<"search"  | "coordinates"> }) => {
     return (
       <div class="mx-auto w-2/3">
         <div class="relative right-0">
@@ -212,25 +208,6 @@ export const Tabs = component$(
             <li
               class={twMerge([
                 "z-30 flex-auto select-none text-center",
-                props.acitveTab.value === "user"
-                  ? "rounded-full bg-black text-white"
-                  : "",
-              ])}
-              onClick$={() => (props.acitveTab.value = "user")}
-            >
-              <a
-                href="#user"
-                class="text-slate-700 z-30 mb-0 flex w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1"
-                data-tab-target=""
-                role="tab"
-                aria-selected="false"
-              >
-                <span class="ml-1">Users</span>
-              </a>
-            </li>
-            <li
-              class={twMerge([
-                "z-30 flex-auto select-none text-center",
                 props.acitveTab.value === "coordinates"
                   ? "rounded-full bg-black text-white"
                   : "",
@@ -254,58 +231,6 @@ export const Tabs = component$(
   },
 );
 
-export const Users = component$((props: { users: UserUsersListType }) => {
-  const addStop = useAddStop();
-  const nav = useNavigate();
-  const plan = usePlan();
-  return (
-    <ul
-      class={"mx-5 mt-5 flex list-none flex-col flex-wrap gap-2 rounded-xl p-1"}
-      data-tabs="tabs"
-      role="list"
-    >
-      {props.users.value.map((user) => (
-        <li
-          class="z-30 flex-auto select-none bg-blue-gray-50/60 text-center"
-          onClick$={() => {
-            addStop
-              .submit({
-                addressLineOne: user.addressLineOne,
-                addressLineTwo: user.addressLineTwo,
-                latitute: user.latitute,
-                longitude: user.longitude,
-                recipient: {
-                  name: user.name,
-                  email: user.email,
-                }
-              })
-              .then((res) => {
-                nav("/" + plan.value.id);
-              });
-          }}
-        >
-          <a
-            href="#search"
-            class="text-slate-700 z-30 mb-0 flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-0 bg-inherit px-0 py-1"
-            data-tab-target=""
-            role="tab"
-            aria-selected="true"
-          >
-            <div class="ml-1">{user.name}</div>
-            <div class="ml-1">{user.email}</div>
-            <div class="ml-1">{user.addressLineOne}</div>
-            <div class="ml-1">{user.addressLineTwo}</div>
-            {user.latitute && user.longitude && (
-              <div class="ml-1">
-                {user.latitute}, {user.longitude}
-              </div>
-            )}
-          </a>
-        </li>
-      ))}
-    </ul>
-  );
-});
 
 export const Coordinates = component$(() => {
   const addByCoordinates = useAddByCoordinates();
