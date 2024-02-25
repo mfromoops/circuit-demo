@@ -23,12 +23,9 @@ export const useAddDrivers = routeAction$(async (body, context) => {
   const { env } = context;
   const drivers = body.drivers as `drivers/${string}`[];
   const planId = context.url.pathname.split("/")[2];
-  console.log(planId)
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
-  return circuitsAPI.updatePlan(drivers, `plans/${planId}`).then(res => {
-    console.log(res)
-  })
+  return circuitsAPI.updatePlan(drivers, `plans/${planId}`);
   
 });
 
@@ -66,8 +63,6 @@ export default component$(() => {
                 <div>{driver.active ? "Active" : "Not Active"}</div>
                 <Button class="bg-green-500 mt-4"
                 onClick$={(e) => {
-                  console.log(e);
-                  console.log(driver);
                   drivers.value.activeDrivers.drivers.push(driver);
                   drivers.value.drivers.drivers = drivers.value.drivers.drivers.filter(
                     (d) => d.id !== driver.id,

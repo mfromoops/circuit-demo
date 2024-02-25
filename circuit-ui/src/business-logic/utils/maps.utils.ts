@@ -23,7 +23,6 @@ export class MapsSearcher {
       )
         .then((res) => res.json() as unknown as MapsResults)
         .then((res) => {
-          console.log(res.results[0].address_components);
           Bun.write("Results", JSON.stringify(res.results));
           return res.results[0].geometry.location as { lat: number; lng: number };
         });

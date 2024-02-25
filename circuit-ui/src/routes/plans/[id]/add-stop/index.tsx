@@ -46,7 +46,6 @@ export const useAddByCoordinates = routeAction$(async (body, { env, url }) => {
     latitude: parseFloat(latitude),
     longitude: parseFloat(longitude),
   }
-  console.log("body", body)
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const planId = url.pathname.split("/")[2];
@@ -69,7 +68,6 @@ export const useAddByCoordinates = routeAction$(async (body, { env, url }) => {
       },
       `plans/${planId}`,
     );
-    console.log(plan)
     return plan;
   } catch (e) {
     console.error(e);
@@ -95,8 +93,6 @@ export const useAddStop = routeAction$(async (body, { env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const planId = url.pathname.split("/")[2];
-  console.log("body", body)
-  console.log(latitude, longitude)
   const address = latitude && longitude ? {latitude, longitude} : {addressLineOne, addressLineTwo}
   try {
     const plan = await circuitsAPI.createStop(

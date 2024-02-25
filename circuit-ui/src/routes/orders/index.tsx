@@ -8,7 +8,6 @@ import {
 
 export const useCreatePlan = routeAction$(async (data, { env, json }) => {
   const orders = data.orders as [string, OrderInfo[]][];
-  console.log(orders);
   for (let key in orders) {
     const tmpOrder = orders[key][1];
     const name = tmpOrder[0].order.store_id.name;
