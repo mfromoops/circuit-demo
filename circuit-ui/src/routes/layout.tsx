@@ -21,6 +21,9 @@ export default component$(() => {
           <Link href="/orders" class="ml-5 text-lg font-bold text-blue-500">
             Orders
           </Link>
+          <Link href="/stores" class="ml-5 text-lg font-bold text-blue-500">
+            Stores
+          </Link>
         </div>
       </div>
     <Slot />

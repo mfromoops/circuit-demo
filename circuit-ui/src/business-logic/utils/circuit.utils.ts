@@ -32,6 +32,15 @@ export class CircuitAPI {
       },
     }).then((res) => res.json());
   }
+  getDepots() {
+    return fetch("https://api.getcircuit.com/public/v0.2b/depots", {
+      method: "GET",
+      headers: {
+        Authorization: BasicAuthentication(this.apiKey, ""),
+        "Content-Type": "application/json",
+      },
+    }).then((res) => res.json());
+  }
   getPlan(planID: `plans/${string}`): Promise<GetPlanResponse> {
     return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}`, {
       method: "GET",

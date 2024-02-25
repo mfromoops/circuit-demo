@@ -34,7 +34,8 @@ export type Store = {
   store_id: string;
   name: string;
   address: string;
-  town: string;
+  town: string
+  depot_id: string;
 };
 export type OrderItem = {
   id?: string;
@@ -61,7 +62,13 @@ export class DirectusClient {
       .with(rest())
       .with(staticToken(access_token));
   }
+  getStores() {
+    return this.client.request(readItems("Stores", { fields: ["store_id", "name", "address", "town", "depot_id"] }));
 
+  }
+  updateStore(store: Store) {
+    return this.client.request(updateItem("Stores", store.store_id, store));
+  }
   getOrders() {
     return this.client.request(
       readItems("order_info", {
@@ -73,7 +80,7 @@ export class DirectusClient {
               "Order_id",
               "pickup_location",
               "delivery_location",
-              { store_id: ["name", "address", "town", "store_id"] },
+              { store_id: ["name", "address", "town", "store_id", "depot_id"] },
             ],
           },
           "order_total",

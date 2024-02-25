@@ -5,6 +5,7 @@ export type PlanObject = {
     month: number;
     year: number;
   };
+  depot?: string;
 };
 
 export type DriverObject = {
@@ -102,4 +103,9 @@ export type StopObject = {
 
 export type ListStopsResponse = {
   stops: StopObject[]
+}
+
+export type Depot = {
+  id: string;
+  name: string;
 }

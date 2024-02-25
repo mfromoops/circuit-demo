@@ -8,13 +8,13 @@ import {
 
 export const useCreatePlan = routeAction$(async (data, { env, json }) => {
   const orders = data.orders as [string, OrderInfo[]][];
-
+  console.log(orders);
   for (let key in orders) {
     const tmpOrder = orders[key][1];
     const name = tmpOrder[0].order.store_id.name;
+    const depot = tmpOrder[0].order.store_id.depot_id;
     const circuit = new CircuitAPI(env.get("CIRCUIT_API_KEY") as string);
     const directus = new DirectusClient(env.get("DIRECTUS_TOKEN") as string);
-
     const today = new Date();
     const plan = await circuit.createPlan({
       title: `${name}`,
@@ -23,6 +23,7 @@ export const useCreatePlan = routeAction$(async (data, { env, json }) => {
         month: today.getMonth() + 1,
         year: today.getFullYear(),
       },
+      depot
     });
 
     for (let order of orders[key][1]) {
