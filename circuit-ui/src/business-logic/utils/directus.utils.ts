@@ -2,6 +2,7 @@ import {
   RestClient,
   StaticTokenClient,
   createDirectus,
+  createItem,
   readItems,
   rest,
   staticToken,
@@ -36,6 +37,7 @@ export type Store = {
   address: string;
   town: string
   depot_id: string;
+  zip_code: string;
 };
 export type OrderItem = {
   id?: string;
@@ -68,6 +70,14 @@ export class DirectusClient {
   }
   updateStore(store: Store) {
     return this.client.request(updateItem("Stores", store.store_id, store));
+  }
+  createStore(store: Store) {
+    this.client.request(createItem("Stores", store)).catch(e => {
+      console.error({
+        message: "Error creating store",
+      })
+      return {};
+    })
   }
   getOrders() {
     return this.client.request(

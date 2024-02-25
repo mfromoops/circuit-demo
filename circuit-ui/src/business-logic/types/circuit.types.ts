@@ -14,11 +14,11 @@ export type DriverObject = {
   email: string;
   phone: string;
   active: boolean;
-}
+};
 export type DriverListResponse = {
-  drivers: DriverObject[]
+  drivers: DriverObject[];
   nextPageToken: string | null;
-}
+};
 export type ListPlansResponse = {
   plans: (PlanObject & {
     id: string;
@@ -27,9 +27,9 @@ export type ListPlansResponse = {
     writable: boolean;
     optimization: string;
     drivers: DriverObject[];
-  })[],
+  })[];
   nextPageToken: string;
-}
+};
 export type RouteResponse = {
   id: string;
   title: string;
@@ -44,8 +44,8 @@ export type RouteResponse = {
     notifiedRecipientsAt: string;
     started: boolean;
     startedAt: string;
-  }
-}
+  };
+};
 export type getPlanResponse = PlanObject & {
   id: `plans/${string}`;
   depot: string;
@@ -53,9 +53,8 @@ export type getPlanResponse = PlanObject & {
   writable: boolean;
   optimization: string;
   drivers: DriverObject[];
-  routes: `routes/${string}`[]
-
-}
+  routes: `routes/${string}`[];
+};
 export type StopObject = {
   id?: `plans/${string}/stops/${string}`;
   address: {
@@ -98,14 +97,20 @@ export type StopObject = {
   packageCount?: number;
   notes?: string;
   webAppLink?: string;
-  type?: string
+  type?: string;
 };
 
 export type ListStopsResponse = {
-  stops: StopObject[]
-}
+  stops: StopObject[];
+};
 
 export type Depot = {
   id: string;
   name: string;
-}
+};
+
+export type SearchAddressResult = {
+  address: string;
+  addressLineOne: string;
+  addressLineTwo: string;
+};
