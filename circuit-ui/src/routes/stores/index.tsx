@@ -1,8 +1,9 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { Form, routeAction$, routeLoader$ } from "@builder.io/qwik-city";
-import { Depot, SearchAddressResult } from "~/business-logic/types";
+import type { Depot, SearchAddressResult } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
-import { DirectusClient, Store } from "~/business-logic/utils/directus.utils";
+import type { Store } from "~/business-logic/utils/directus.utils";
+import { DirectusClient } from "~/business-logic/utils/directus.utils";
 
 export const useStores = routeLoader$(async (context) => {
   const access_token = context.env.get("DIRECTUS_TOKEN") as string;
@@ -14,16 +15,15 @@ export const useStores = routeLoader$(async (context) => {
   return { stores, depots };
 });
 
-export const useSearch = routeAction$(async ({ query }, { env, url }) => {
+export const useSearch = routeAction$(async ({ query }, { env }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
-  const plans = await circuitsAPI.searchAddress(query as string).catch(e => {
+  const plans = await circuitsAPI.searchAddress(query as string).catch((e) => {
     console.error(e);
     return {
-        suggestions: []
+      suggestions: [],
     };
-  
-  })
+  });
   return plans;
 });
 
@@ -38,56 +38,55 @@ export const useCreateStore = routeAction$(async (body, context) => {
   const store = body as Store;
   const access_token = context.env.get("DIRECTUS_TOKEN") as string;
   const directusClient = new DirectusClient(access_token);
-    directusClient.createStore(store);
+  directusClient.createStore(store);
 });
 export default component$(() => {
   const stores = useStores();
   const updateStore = useUpdateStore();
   const createStore = useCreateStore();
   const search = useSearch();
-  let selectedAddress = useSignal<SearchAddressResult>();
+  const selectedAddress = useSignal<SearchAddressResult>();
   return (
     <div class="flex px-5">
       <div class="flex-[3]">
-        {stores.value &&
-          stores.value?.stores.map((store) => {
-            return (
-              <div class="m-5 rounded-lg bg-gray-100 p-5" key={store.store_id}>
-                <div class="text-lg font-bold">{store.name}</div>
-                <div>{store.address}</div>
-                <div>{store.town}</div>
-                <div class="grid">
-                  <label>Match with a depot</label>
-                  {
-                    <select
-                      value={store.depot_id}
-                      class="rounded-lg border-2 border-gray-400 p-2"
-                      onChange$={(e) => {
-                        store.depot_id = (e.target as HTMLSelectElement).value;
-                        updateStore.submit(store);
-                      }}
-                    >
-                      <option value={""} disabled selected={!store.depot_id}>
-                        {"Select One"}
-                      </option>
-                      ;
-                      {stores.value.depots.map((depot) => {
-                        return (
-                          <option
-                            key={depot.id}
-                            value={depot.id}
-                            selected={depot.id === store.depot_id}
-                          >
-                            {depot.name}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  }
-                </div>
+        {stores.value.stores.map((store) => {
+          return (
+            <div class="m-5 rounded-lg bg-gray-100 p-5" key={store.store_id}>
+              <div class="text-lg font-bold">{store.name}</div>
+              <div>{store.address}</div>
+              <div>{store.town}</div>
+              <div class="grid">
+                <label>Match with a depot</label>
+                {
+                  <select
+                    value={store.depot_id}
+                    class="rounded-lg border-2 border-gray-400 p-2"
+                    onChange$={(e) => {
+                      store.depot_id = (e.target as HTMLSelectElement).value;
+                      updateStore.submit(store);
+                    }}
+                  >
+                    <option value={""} disabled selected={!store.depot_id}>
+                      {"Select One"}
+                    </option>
+                    ;
+                    {stores.value.depots.map((depot) => {
+                      return (
+                        <option
+                          key={depot.id}
+                          value={depot.id}
+                          selected={depot.id === store.depot_id}
+                        >
+                          {depot.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                }
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
       </div>
       <div class="flex-1">
         <div class="m-5 rounded-lg bg-gray-100 p-5">
@@ -99,18 +98,18 @@ export default component$(() => {
               <button
                 class="rounded-md bg-blue-500 p-2 text-white"
                 onClick$={() => {
-                    if(!selectedAddress.value) return;
-                    const tmpStore: Omit<Store, "store_id"> = {
-                        name: selectedAddress.value.addressLineOne,
-                        address: selectedAddress.value.addressLineOne,
-                        town: selectedAddress.value.addressLineTwo,
-                        zip_code: "00794",
-                        depot_id: "",
-                    };
-                    createStore.submit(tmpStore).then(a => {
-                        selectedAddress.value = undefined;
-                        search.submit({ query: ""});
-                    })
+                  if (!selectedAddress.value) return;
+                  const tmpStore: Omit<Store, "store_id"> = {
+                    name: selectedAddress.value.addressLineOne,
+                    address: selectedAddress.value.addressLineOne,
+                    town: selectedAddress.value.addressLineTwo,
+                    zip_code: "00794",
+                    depot_id: "",
+                  };
+                  createStore.submit(tmpStore).then(() => {
+                    selectedAddress.value = undefined;
+                    search.submit({ query: "" });
+                  });
                 }}
               >
                 Add Store
@@ -118,7 +117,7 @@ export default component$(() => {
               <button
                 class="rounded-md bg-gray-500 p-2 text-white"
                 onClick$={() => {
-                    selectedAddress.value = undefined;
+                  selectedAddress.value = undefined;
                 }}
               >
                 Cancel
@@ -135,7 +134,8 @@ export default component$(() => {
                   Search
                 </button>
               </Form>
-              {search.value && search.value.suggestions &&
+              {search.value &&
+                search.value.suggestions &&
                 search.value.suggestions.map((sug: any) => (
                   <div
                     key={sug.placeId}

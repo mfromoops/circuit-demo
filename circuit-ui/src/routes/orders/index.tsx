@@ -1,14 +1,12 @@
 import { component$ } from "@builder.io/qwik";
 import { routeAction$, routeLoader$ } from "@builder.io/qwik-city";
 import { CircuitAPI } from "~/business-logic/utils";
-import {
-  DirectusClient,
-  OrderInfo,
-} from "~/business-logic/utils/directus.utils";
+import type { OrderInfo } from "~/business-logic/utils/directus.utils";
+import { DirectusClient } from "~/business-logic/utils/directus.utils";
 
-export const useCreatePlan = routeAction$(async (data, { env, json }) => {
+export const useCreatePlan = routeAction$(async (data, { env }) => {
   const orders = data.orders as [string, OrderInfo[]][];
-  for (let key in orders) {
+  for (const key in orders) {
     const tmpOrder = orders[key][1];
     const name = tmpOrder[0].order.store_id.name;
     const depot = tmpOrder[0].order.store_id.depot_id;
@@ -22,10 +20,12 @@ export const useCreatePlan = routeAction$(async (data, { env, json }) => {
         month: today.getMonth() + 1,
         year: today.getFullYear(),
       },
-      depot
+      depot,
     });
 
-    for (let order of orders[key][1]) {
+    console.log({ plan });
+
+    for (const order of orders[key][1]) {
       const items = await directus.getOrderItems(order.order.Order_id);
       const stop = await circuit.createStop(
         {
@@ -56,8 +56,9 @@ export const useOrders = routeLoader$(async (context) => {
   const access_token = context.env.get("DIRECTUS_TOKEN") as string;
   const directusClient = new DirectusClient(access_token);
   const orders = await directusClient.getOrders();
+  console.log({ orders });
   const map = new Map<string, OrderInfo[]>();
-  for (let order of orders) {
+  for (const order of orders) {
     if (map.has(order.order.store_id.store_id)) {
       const orderInfo = map.get(order.order.store_id.store_id);
       orderInfo?.push(order);
@@ -69,7 +70,6 @@ export const useOrders = routeLoader$(async (context) => {
   // const orders = await client.request(readItems('order_info'));
   // return orders
 });
-
 
 export default component$(() => {
   const stores = useOrders();

@@ -21,7 +21,7 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
   return newPlan;
 });
 
-export const useDistributePlan = routeAction$(async ({}, { env, url }) => {
+export const useDistributePlan = routeAction$(async (_, { env, url }) => {
   const id = url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
@@ -34,7 +34,7 @@ export const useDistributePlan = routeAction$(async ({}, { env, url }) => {
   return plan;
 });
 
-const useOptimizePlan = routeAction$(async ({}, { env, url }) => {
+export const useOptimizePlan = routeAction$(async (_, { env, url }) => {
   const id = url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
@@ -86,7 +86,7 @@ export default component$(() => {
               <Button
                 class="bg-green-500"
                 onClick$={() => {
-                  optimizePlan.submit({ ...plan.value }).then((res) => {
+                  optimizePlan.submit({ ...plan.value }).then(() => {
                     distributePlan.submit({ ...plan.value });
                   });
                 }}

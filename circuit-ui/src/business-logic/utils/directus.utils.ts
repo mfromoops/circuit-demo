@@ -1,6 +1,5 @@
+import type { RestClient, StaticTokenClient } from "@directus/sdk";
 import {
-  RestClient,
-  StaticTokenClient,
   createDirectus,
   createItem,
   readItems,
@@ -35,7 +34,7 @@ export type Store = {
   store_id: string;
   name: string;
   address: string;
-  town: string
+  town: string;
   depot_id: string;
   zip_code: string;
 };
@@ -65,19 +64,22 @@ export class DirectusClient {
       .with(staticToken(access_token));
   }
   getStores() {
-    return this.client.request(readItems("Stores", { fields: ["store_id", "name", "address", "town", "depot_id"] }));
-
+    return this.client.request(
+      readItems("Stores", {
+        fields: ["store_id", "name", "address", "town", "depot_id"],
+      }),
+    );
   }
   updateStore(store: Store) {
     return this.client.request(updateItem("Stores", store.store_id, store));
   }
   createStore(store: Store) {
-    this.client.request(createItem("Stores", store)).catch(e => {
+    return this.client.request(createItem("Stores", store)).catch(() => {
       console.error({
         message: "Error creating store",
-      })
+      });
       return {};
-    })
+    });
   }
   getOrders() {
     return this.client.request(
