@@ -1,17 +1,10 @@
+import type { Signal } from "@builder.io/qwik";
+import { component$, useSignal } from "@builder.io/qwik";
 import {
-  $,
-  Signal,
-  component$,
-  useSignal,
-  useTask$,
-  useVisibleTask$,
-} from "@builder.io/qwik";
-import {
-  routeLoader$,
-  routeAction$,
   Form,
+  routeAction$,
+  routeLoader$,
   useNavigate,
-  useLocation,
 } from "@builder.io/qwik-city";
 import { twMerge } from "tailwind-merge";
 import { CircuitAPI } from "~/business-logic/utils";
@@ -25,6 +18,9 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const plan = await circuitsAPI.getPlan(`plans/${id}`);
+  if (!plan) {
+    return undefined;
+  }
   const routes = Promise.all(
     plan.routes.map((route) => circuitsAPI.getRoute(route)),
   );
@@ -33,7 +29,7 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
   return newPlan;
 });
 
-export const useSearch = routeAction$(async ({ query }, { env, url }) => {
+export const useSearch = routeAction$(async ({ query }, { env }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const plans = await circuitsAPI.searchAddress(query as string);
@@ -41,11 +37,14 @@ export const useSearch = routeAction$(async ({ query }, { env, url }) => {
 });
 
 export const useAddByCoordinates = routeAction$(async (body, { env, url }) => {
-  const { latitude, longitude } = body as { latitude: string; longitude: string };
+  const { latitude, longitude } = body as {
+    latitude: string;
+    longitude: string;
+  };
   const address = {
     latitude: parseFloat(latitude),
     longitude: parseFloat(longitude),
-  }
+  };
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const planId = url.pathname.split("/")[2];
@@ -84,16 +83,23 @@ export const useAddStop = routeAction$(async (body, { env, url }) => {
     recipient?: {
       name: string;
       email: string;
-    }
+    };
   };
-  
-  const { addressLineOne, addressLineTwo,  recipient } = stopBody;
-  const latitude = stopBody.latitute ? parseFloat(stopBody.latitute) : undefined;
-  const longitude = stopBody.longitude ? parseFloat(stopBody.longitude) : undefined;
+
+  const { addressLineOne, addressLineTwo, recipient } = stopBody;
+  const latitude = stopBody.latitute
+    ? parseFloat(stopBody.latitute)
+    : undefined;
+  const longitude = stopBody.longitude
+    ? parseFloat(stopBody.longitude)
+    : undefined;
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const planId = url.pathname.split("/")[2];
-  const address = latitude && longitude ? {latitude, longitude} : {addressLineOne, addressLineTwo}
+  const address =
+    latitude && longitude
+      ? { latitude, longitude }
+      : { addressLineOne, addressLineTwo };
   try {
     const plan = await circuitsAPI.createStop(
       {
@@ -119,8 +125,7 @@ export const useAddStop = routeAction$(async (body, { env, url }) => {
 
 export default component$(() => {
   const plan = usePlan();
-  const activeTab: Signal<"search" | "coordinates"> =
-    useSignal("search");
+  const activeTab: Signal<"search" | "coordinates"> = useSignal("search");
   return (
     <>
       <Tabs acitveTab={activeTab}></Tabs>
@@ -151,8 +156,8 @@ const SearchForm = component$((props: { plan: UsePlanType }) => {
                   addressLineOne: sug.addressLineOne,
                   addressLineTwo: sug.addressLineTwo,
                 })
-                .then((res) => {
-                  nav("/" + props.plan.value.id);
+                .then(() => {
+                  if (props.plan.value) nav("/" + props.plan.value.id);
                 });
             }}
           >
@@ -171,7 +176,7 @@ const SearchForm = component$((props: { plan: UsePlanType }) => {
 });
 
 export const Tabs = component$(
-  (props: { acitveTab: Signal<"search"  | "coordinates"> }) => {
+  (props: { acitveTab: Signal<"search" | "coordinates"> }) => {
     return (
       <div class="mx-auto w-2/3">
         <div class="relative right-0">
@@ -226,7 +231,6 @@ export const Tabs = component$(
     );
   },
 );
-
 
 export const Coordinates = component$(() => {
   const addByCoordinates = useAddByCoordinates();

@@ -14,5 +14,5 @@ setupServiceWorker();
 addEventListener("install", () => self.skipWaiting());
 
 addEventListener("activate", () => self.clients.claim());
-
+// @ts-ignore
 declare const self: ServiceWorkerGlobalScope;

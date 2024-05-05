@@ -26,22 +26,20 @@ export const useAddDrivers = routeAction$(async (body, context) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   return circuitsAPI.updatePlan(drivers, `plans/${planId}`);
-  
 });
 
 export default component$(() => {
   const drivers = useListDrivers();
   const manageDrivers = useAddDrivers();
   const nav = useNavigate();
-  const selectedDrivers = useSignal<DriverObject[]>(drivers.value.activeDrivers.drivers);
+  const selectedDrivers = useSignal<DriverObject[]>(
+    drivers.value.activeDrivers.drivers,
+  );
   return (
     <>
-      <div class="flex m-5">
+      <div class="m-5 flex">
         <button
-          onClick$={() => 
-            nav(`/plans/${location.pathname.split("/")[2]}`)
-          }
-
+          onClick$={() => nav(`/plans/${location.pathname.split("/")[2]}`)}
           class="rounded-md bg-gray-500 p-2 px-5 text-white"
         >
           Back
@@ -52,24 +50,27 @@ export default component$(() => {
           Drivers Available
           {drivers.value &&
             drivers.value.drivers.drivers.map((driver) => (
-              <div
-                key={driver.id}
-                class="my-2 grid bg-white p-5 shadow-md"
-                
-              >
+              <div key={driver.id} class="my-2 grid bg-white p-5 shadow-md">
                 <div>{driver.name}</div>
                 <div>{driver.email}</div>
                 <div>{driver.phone}</div>
                 <div>{driver.active ? "Active" : "Not Active"}</div>
-                <Button class="bg-green-500 mt-4"
-                onClick$={(e) => {
-                  drivers.value.activeDrivers.drivers.push(driver);
-                  drivers.value.drivers.drivers = drivers.value.drivers.drivers.filter(
-                    (d) => d.id !== driver.id,
-                  );
-                  selectedDrivers.value.push(driver);
-                  manageDrivers.submit({drivers: selectedDrivers.value.map(d => d.id as `drivers/${string}`)});
-                }}>
+                <Button
+                  class="mt-4 bg-green-500"
+                  onClick$={() => {
+                    drivers.value.activeDrivers.drivers.push(driver);
+                    drivers.value.drivers.drivers =
+                      drivers.value.drivers.drivers.filter(
+                        (d) => d.id !== driver.id,
+                      );
+                    selectedDrivers.value.push(driver);
+                    manageDrivers.submit({
+                      drivers: selectedDrivers.value.map(
+                        (d) => d.id as `drivers/${string}`,
+                      ),
+                    });
+                  }}
+                >
                   Add Driver
                 </Button>
               </div>
@@ -80,25 +81,28 @@ export default component$(() => {
           Selected Drivers
           {drivers.value &&
             drivers.value.activeDrivers.drivers.map((driver) => (
-              <div key={driver.id} class="my-2 bg-white p-5 shadow-md grid"
-              
-              >
+              <div key={driver.id} class="my-2 grid bg-white p-5 shadow-md">
                 <div>{driver.name}</div>
                 <div>{driver.email}</div>
                 <div>{driver.phone}</div>
                 <div>{driver.active ? "Active" : "Not Active"}</div>
-                <Button class="bg-red-500 mt-4"
-                onClick$={() => {
-                  drivers.value.drivers.drivers.push(driver);
-                  drivers.value.activeDrivers.drivers = drivers.value.activeDrivers.drivers.filter(
-                    (d) => d.id !== driver.id,
-                  );
-                  selectedDrivers.value = selectedDrivers.value.filter(
-                    (d) => d.id !== driver.id,
-                  );
-                  manageDrivers.submit({drivers: selectedDrivers.value.map(d => d.id as `drivers/${string}`)});
-                
-                }}
+                <Button
+                  class="mt-4 bg-red-500"
+                  onClick$={() => {
+                    drivers.value.drivers.drivers.push(driver);
+                    drivers.value.activeDrivers.drivers =
+                      drivers.value.activeDrivers.drivers.filter(
+                        (d) => d.id !== driver.id,
+                      );
+                    selectedDrivers.value = selectedDrivers.value.filter(
+                      (d) => d.id !== driver.id,
+                    );
+                    manageDrivers.submit({
+                      drivers: selectedDrivers.value.map(
+                        (d) => d.id as `drivers/${string}`,
+                      ),
+                    });
+                  }}
                 >
                   Remove Driver
                 </Button>
