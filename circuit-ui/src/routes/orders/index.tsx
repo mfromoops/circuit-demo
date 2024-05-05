@@ -7,6 +7,7 @@ import { DirectusClient } from "~/business-logic/utils/directus.utils";
 export const useCreatePlan = routeAction$(async (data, { env }) => {
   const orders = data.orders as [string, OrderInfo[]][];
   for (const key in orders) {
+    let products: string[] = [];
     const tmpOrder = orders[key][1];
     const name = tmpOrder[0].order.store_id.name;
     const depot = tmpOrder[0].order.store_id.depot_id;
@@ -23,20 +24,15 @@ export const useCreatePlan = routeAction$(async (data, { env }) => {
       depot,
     });
 
-    console.log({ plan });
-
     for (const order of orders[key][1]) {
       const items = await directus.getOrderItems(order.order.Order_id);
+      products = products.concat(
+        items.map((item) => item.name + " " + item.model),
+      );
       const stop = await circuit.createStop(
         {
           address: {
             addressLineOne: order.order.delivery_location,
-          },
-          recipient: {
-            name: order.client.name + " " + order.client.last_names,
-            phone: order.client.phone_number,
-            externalId: order.client.id,
-            email: order.client.email,
           },
           orderInfo: {
             products: items.map((item) => item.name + " " + item.model),
@@ -49,6 +45,21 @@ export const useCreatePlan = routeAction$(async (data, { env }) => {
       );
       await directus.addRouteInfo(order.id, stop.id, plan.id);
     }
+    await circuit.createStop(
+      {
+        address: {
+          addressLineOne: tmpOrder[0].order.store_id.town,
+        },
+        activity: "pickup",
+        optimizationOrder: "first",
+        orderInfo: {
+          products,
+          sellerName: tmpOrder[0].order.store_id.name,
+          sellerOrderId: tmpOrder[0].order.Order_id,
+        },
+      },
+      plan.id,
+    );
   }
 });
 

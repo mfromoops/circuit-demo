@@ -9,6 +9,7 @@ import {
   type DocumentHead,
 } from "@builder.io/qwik-city";
 import { twMerge } from "tailwind-merge";
+import { type PlanObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import { TextField } from "~/components/ui/Fields";
 import { Button, Card, CardHeading } from "~/components/ui/UIComponents";
@@ -18,9 +19,16 @@ export const useCircuit = routeLoader$(async ({ env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const resp = await circuitsAPI.listPlans(token as string);
+  console.log({ resp });
+  if (!resp.plans) {
+    resp.plans = [];
+  }
   let nextPageToken = resp.nextPageToken;
   while (nextPageToken) {
     const next = await circuitsAPI.listPlans(nextPageToken);
+    if (!next.plans) {
+      next.plans = [];
+    }
     resp.plans = resp.plans.concat(next.plans);
     nextPageToken = next.nextPageToken;
   }
@@ -48,6 +56,19 @@ export const useCreatePlan = routeAction$(async (data, { env, json }) => {
   });
   json(200, { message: "Plan created" });
 });
+
+export const useDeleteAllPlans = routeAction$(async (body, { env, json }) => {
+  const plansStr = body.plans as string;
+  const allPlans = JSON.parse(plansStr) as PlanObject[];
+  console.log({ allPlans });
+  const apiKey = env.get("CIRCUIT_API_KEY");
+  const circuitsAPI = new CircuitAPI(apiKey as string);
+  for (const plan of allPlans) {
+    await circuitsAPI.deletePlan(plan.id as `plans/${string}`);
+  }
+  json(200, { message: "Plans deleted" });
+});
+
 export default component$(() => {
   const plans = useCircuit();
   const createPlan = useCreatePlan();
@@ -67,8 +88,20 @@ export default component$(() => {
     track(() => loc.url.href);
     updateNavState();
   });
+  const deleteAllPlans = useDeleteAllPlans();
   return (
     <div>
+      <div>
+        <button
+          onClick$={() => {
+            const formData = new FormData();
+            formData.append("plans", JSON.stringify(plans.value.plans));
+            deleteAllPlans.submit(formData);
+          }}
+        >
+          Delete All Plans
+        </button>
+      </div>
       <div class="flex gap-5 px-5">
         <div class="mb-5 grid flex-1 gap-2">
           <div class="flex justify-between px-5">

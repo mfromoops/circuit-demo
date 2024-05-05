@@ -6,6 +6,11 @@ export type PlanObject = {
     year: number;
   };
   depot?: string;
+  id?: `plans/${string}`;
+  distributed?: boolean;
+  writable?: boolean;
+  optimization?: string;
+  drivers?: DriverObject[];
 };
 
 export type DriverObject = {
@@ -20,14 +25,16 @@ export type DriverListResponse = {
   nextPageToken: string | null;
 };
 export type ListPlansResponse = {
-  plans: (PlanObject & {
-    id: string;
-    depot: string;
-    distributed: boolean;
-    writable: boolean;
-    optimization: string;
-    drivers: DriverObject[];
-  })[];
+  plans:
+    | (PlanObject & {
+        id: string;
+        depot: string;
+        distributed: boolean;
+        writable: boolean;
+        optimization: string;
+        drivers: DriverObject[];
+      })[]
+    | undefined;
   nextPageToken: string;
 };
 export type RouteResponse = {
@@ -93,6 +100,7 @@ export type StopObject = {
   };
   driver?: string;
   allowedDrivers?: string[];
+  optimizationOrder?: "first" | "last" | "default";
   activity?: "delivery" | "pickup";
   packageCount?: number;
   notes?: string;

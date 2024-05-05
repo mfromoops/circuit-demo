@@ -13,6 +13,9 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const plan = await circuitsAPI.getPlan(`plans/${id}`);
+  if (!plan) {
+    return undefined;
+  }
   const routes = Promise.all(
     plan.routes.map((route) => circuitsAPI.getRoute(route)),
   );
@@ -26,8 +29,11 @@ export const useDistributePlan = routeAction$(async (_, { env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   let plan = await circuitsAPI.getPlan(`plans/${id}`);
+  if (plan === undefined) {
+    throw new Error("Plan not found");
+  }
   await circuitsAPI.distributePlan(`plans/${id}`);
-  while (!plan.distributed) {
+  while (plan && !plan.distributed) {
     await new Promise((res) => setTimeout(res, 1500));
     plan = await circuitsAPI.getPlan(`plans/${id}`);
   }
@@ -38,9 +44,12 @@ export const useOptimizePlan = routeAction$(async (_, { env, url }) => {
   const id = url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
-  await circuitsAPI.optimizePlan(`plans/${id}`);
   let plan = await circuitsAPI.getPlan(`plans/${id}`);
-  while (plan.optimization === "creating") {
+  if (plan === undefined) {
+    throw new Error("Plan not found");
+  }
+  await circuitsAPI.optimizePlan(`plans/${id}`);
+  while (plan && plan.optimization === "creating") {
     await new Promise((res) => setTimeout(res, 1500));
     plan = await circuitsAPI.getPlan(`plans/${id}`);
   }
@@ -49,6 +58,21 @@ export const useOptimizePlan = routeAction$(async (_, { env, url }) => {
 
 export default component$(() => {
   const plan = usePlan();
+  if (!plan.value) {
+    return (
+      // container should take all the space left after the header
+      <div class="absolute bottom-0 left-0 top-0 flex h-full w-full items-center justify-center">
+        <div class="text-center">
+          <h1 class="mb-5 text-3xl">Plan Not Found</h1>
+          <Link href="/">
+            <Button type="button" class="w-32 bg-gray-500">
+              Back
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
   const distributePlan = useDistributePlan();
   const optimizePlan = useOptimizePlan();
   return (
