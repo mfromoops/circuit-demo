@@ -98,6 +98,20 @@ export type StopObject = {
     sellerName?: string;
     sellerWebsite?: string;
   };
+  deliveryInfo: {
+    attempted: boolean;
+    attemptedAt: number;
+    attemptedLocation: any;
+    driverProvidedInternalNotes: any;
+    driverProvidedRecipientNotes: any;
+    photoUrls: string[];
+    recipientProvidedNotes: any[];
+    signatureUrl: string;
+    signeeName: string;
+    succeeded: boolean;
+    // state: "delivered_to_recipient";
+    state: string;
+  };
   driver?: string;
   allowedDrivers?: string[];
   optimizationOrder?: "first" | "last" | "default";

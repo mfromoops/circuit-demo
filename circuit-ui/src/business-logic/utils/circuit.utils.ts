@@ -22,7 +22,7 @@ export class CircuitAPI {
       body: JSON.stringify(plan),
     }).then((res) => res.json());
   }
-  createStop(stop: StopObject, planID: `plans/${string}`) {
+  createStop(stop: Partial<StopObject>, planID: `plans/${string}`) {
     return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}/stops`, {
       method: "POST",
       headers: {

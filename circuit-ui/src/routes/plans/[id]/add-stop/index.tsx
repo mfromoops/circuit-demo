@@ -141,10 +141,19 @@ const SearchForm = component$((props: { plan: UsePlanType }) => {
   const nav = useNavigate();
   return !addStop.isRunning ? (
     <>
-      <Form action={search} class="mx-5 mt-5 grid rounded-md p-5 shadow-md">
-        <input type="text" name="query" class="border" />
-        <button type="submit">Search</button>
-      </Form>
+      <div class="mt-5">
+        <div class="mx-5 p-5 shadow-md">
+          <Form class="grid gap-2" action={search}>
+            <div class="flex gap-2">
+              <TextField label="Search Location" inputName="query" />
+            </div>
+            <Button type="submit" class="mt-5 bg-[#f99d1d]">
+              Search
+            </Button>
+          </Form>
+        </div>
+      </div>
+
       {search.value &&
         search.value.suggestions.map((sug: any) => (
           <div
@@ -192,7 +201,7 @@ export const Tabs = component$(
               class={twMerge([
                 "z-30 flex-auto select-none text-center",
                 props.acitveTab.value === "search"
-                  ? "rounded-full bg-black text-white"
+                  ? "rounded-full bg-[#f99d1d] text-white"
                   : "",
               ])}
             >
@@ -210,7 +219,7 @@ export const Tabs = component$(
               class={twMerge([
                 "z-30 flex-auto select-none text-center",
                 props.acitveTab.value === "coordinates"
-                  ? "rounded-full bg-black text-white"
+                  ? "rounded-full bg-[#f99d1d] text-white"
                   : "",
               ])}
               onClick$={() => (props.acitveTab.value = "coordinates")}
@@ -238,9 +247,11 @@ export const Coordinates = component$(() => {
     <div class="mt-5">
       <div class="mx-5 p-5 shadow-md">
         <Form class="grid gap-2" action={addByCoordinates}>
-          <TextField label="Latitude" inputName="latitude" />
-          <TextField label="Longitude" inputName="longitude" />
-          <Button type="submit" class="bg-green-500">
+          <div class="flex gap-2">
+            <TextField label="Latitude" inputName="latitude" />
+            <TextField label="Longitude" inputName="longitude" />
+          </div>
+          <Button type="submit" class="mt-5 bg-[#f99d1d]">
             Search
           </Button>
         </Form>

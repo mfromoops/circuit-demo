@@ -96,7 +96,7 @@ export default component$(() => {
               <div>{selectedAddress.value.addressLineOne}</div>
               <div>{selectedAddress.value.addressLineTwo}</div>
               <button
-                class="rounded-md bg-blue-500 p-2 text-white"
+                class="rounded-md bg-[#f99d1d] p-2 text-white"
                 onClick$={() => {
                   if (!selectedAddress.value) return;
                   const tmpStore: Omit<Store, "store_id"> = {
@@ -128,7 +128,7 @@ export default component$(() => {
               <Form action={search} class="grid gap-2">
                 <input class="rounded-md border p-2" type="text" name="query" />
                 <button
-                  class="rounded-md bg-blue-500 p-2 text-white"
+                  class="rounded-md bg-[#f99d1d] p-2 text-white"
                   type="submit"
                 >
                   Search
@@ -139,7 +139,7 @@ export default component$(() => {
                 search.value.suggestions.map((sug: any) => (
                   <div
                     key={sug.placeId}
-                    class="mx-5 mt-5 rounded-md bg-white p-5 shadow-md"
+                    class="mt-5 rounded-md bg-white p-5 shadow-md"
                     onClick$={() => {
                       selectedAddress.value = sug;
                     }}

@@ -92,22 +92,24 @@ export default component$(() => {
   return (
     <div>
       <div>
-        <button
-          onClick$={() => {
-            const formData = new FormData();
-            formData.append("plans", JSON.stringify(plans.value.plans));
-            deleteAllPlans.submit(formData);
-          }}
-        >
-          Delete All Plans
-        </button>
+        {false && (
+          <button
+            onClick$={() => {
+              const formData = new FormData();
+              formData.append("plans", JSON.stringify(plans.value.plans));
+              deleteAllPlans.submit(formData);
+            }}
+          >
+            Delete All Plans
+          </button>
+        )}
       </div>
       <div class="flex gap-5 px-5">
         <div class="mb-5 grid flex-1 gap-2">
           <div class="flex justify-between px-5">
             <button
               class={twMerge(
-                "h-10 rounded-md bg-blue-500 px-5 text-white shadow-md hover:shadow-lg",
+                "h-10 rounded-md bg-[#f99d1d] px-5 text-white shadow-md hover:shadow-lg",
                 !navState.value.canGoBack
                   ? "pointer-events-none opacity-50 shadow-none"
                   : "",
@@ -123,7 +125,7 @@ export default component$(() => {
             <button
               disabled={!navState.value.canGoForward}
               class={twMerge(
-                "h-10 rounded-md bg-blue-500 px-5 text-white shadow-md hover:shadow-lg",
+                "h-10 rounded-md bg-[#f99d1d] px-5 text-white shadow-md hover:shadow-lg",
                 !navState.value.canGoForward
                   ? "pointer-events-none opacity-50 shadow-none"
                   : "",
@@ -137,11 +139,23 @@ export default component$(() => {
           </div>
           {plans.value.plans.map((plan) => (
             <Link href={plan.id} key={plan.id} class="bg-white p-2 shadow-md">
-              <h2>{plan.title}</h2>
+              <h2 class="mb-5 text-xl">{plan.title}</h2>
               <p>
-                {plan.starts.day}/{plan.starts.month}/{plan.starts.year}
+                Planned for {plan.starts.day}/{plan.starts.month}/
+                {plan.starts.year}
               </p>
-              <p>{plan.drivers.map((d) => d.email).join(", ")}</p>
+              <p>
+                {plan.optimization.slice(0, 1).toUpperCase() +
+                  plan.optimization.slice(1)}
+              </p>
+              <p>{plan.distributed ? "Distributed" : "Not Distributed"}</p>
+              {plan.drivers.length > 0 ? (
+                <p>
+                  Assigned Drivers {plan.drivers.map((d) => d.email).join(", ")}
+                </p>
+              ) : (
+                <p>No Drivers Assigned</p>
+              )}
             </Link>
           ))}
         </div>
@@ -151,7 +165,7 @@ export default component$(() => {
             <Form action={createPlan} class="grid gap-2">
               <TextField inputName="name" label="Plan Name" />
               <input name="date" type="date" />
-              <Button type="submit" class="bg-green-500 outline">
+              <Button type="submit" class="bg-[#f99d1d] outline">
                 Create Plan
               </Button>
             </Form>

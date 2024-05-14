@@ -56,7 +56,7 @@ export default component$(() => {
                 <div>{driver.phone}</div>
                 <div>{driver.active ? "Active" : "Not Active"}</div>
                 <Button
-                  class="mt-4 bg-green-500"
+                  class="mt-4 bg-[#f99d1d]"
                   onClick$={() => {
                     drivers.value.activeDrivers.drivers.push(driver);
                     drivers.value.drivers.drivers =

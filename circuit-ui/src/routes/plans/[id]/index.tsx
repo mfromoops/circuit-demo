@@ -5,6 +5,7 @@ import {
   routeLoader$,
   type DocumentHead,
 } from "@builder.io/qwik-city";
+import { StopObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import { Button } from "~/components/ui/UIComponents";
 
@@ -56,6 +57,29 @@ export const useOptimizePlan = routeAction$(async (_, { env, url }) => {
   return plan;
 });
 
+function getStyle(stop: StopObject) {
+  const deliveryInfo = stop.deliveryInfo;
+  const state = deliveryInfo.state;
+  const attempted = deliveryInfo.attempted;
+  if (attempted) {
+    if (state.includes("delivered")) {
+      return {
+        backgroundColor: "green",
+        color: "white",
+      };
+    } else {
+      return {
+        backgroundColor: "red",
+        color: "white",
+      };
+    }
+  } else {
+    return {
+      backgroundColor: "white",
+      color: "black",
+    };
+  }
+}
 export default component$(() => {
   const plan = usePlan();
   if (!plan.value) {
@@ -77,7 +101,7 @@ export default component$(() => {
   const optimizePlan = useOptimizePlan();
   return (
     <>
-      <h1 class="w-full border text-center text-lg">Circuit Stops</h1>
+      <h1 class="w-full text-center text-lg">Circuit Stops</h1>
       <div class="mb-5 flex justify-between px-5">
         <Link href="/">
           <Button type="button" class="bg-gray-500">
@@ -87,13 +111,13 @@ export default component$(() => {
         {plan.value.optimization === "creating" && (
           <div class="flex gap-2">
             <Link href={`add-stop`}>
-              <Button type="button" class="bg-green-500">
+              <Button type="button" class="bg-[#f99d1d]">
                 Add Stop
               </Button>
             </Link>
             <Link href={`add-drivers`}>
-              <Button type="button" class="bg-blue-500">
-                Add Drivers
+              <Button type="button" class="bg-[#002547]">
+                Manage Drivers
               </Button>
             </Link>
           </div>
@@ -102,13 +126,17 @@ export default component$(() => {
       <div class="grid gap-2 px-5">
         <div class="bg-white p-2 shadow-md">
           <h2>{plan.value.title}</h2>
-          <p>{plan.value.drivers.map((d) => d.email).join(", ")}</p>
+          <p>
+            {plan.value.drivers.length > 0
+              ? plan.value.drivers.map((d) => d.email).join(", ")
+              : "No Drivers Assigned"}
+          </p>
           <p>{plan.value.optimization}</p>
           <p>{plan.value.distributed ? "Distributed" : "Not Distributed"}</p>
           {plan.value.optimization === "creating" && (
             <div class="flex gap-5">
               <Button
-                class="bg-green-500"
+                class="bg-green-700"
                 onClick$={() => {
                   optimizePlan.submit({ ...plan.value }).then(() => {
                     distributePlan.submit({ ...plan.value });
@@ -122,14 +150,17 @@ export default component$(() => {
         </div>
         <h1 class="text-center text-lg">Stops</h1>
         {plan.value.stops.map((stop) => (
-          <a
-            href={stop.webAppLink}
-            target="_blank"
-            class="bg-white p-2 shadow-md"
+          <div
+            style={{
+              ...getStyle(stop),
+              padding: "10px",
+              margin: "10px",
+              boxShadow: "2px 2px 2px #ccc",
+            }}
             key={stop.id}
           >
             <div class="flex justify-between">
-              <h2>{stop.address.addressLineOne}</h2>
+              <h2 class="mb-2 text-lg">{stop.address.addressLineOne}</h2>
               <span>
                 <span class="flex rounded-sm bg-gray-300 px-2 py-0 align-middle text-xs text-white">
                   {stop.type}
@@ -137,7 +168,26 @@ export default component$(() => {
               </span>
             </div>
             <h2>{stop.address.addressLineTwo}</h2>
-          </a>
+            <h2>
+              {stop.activity &&
+                stop.activity.slice(0, 1).toUpperCase() +
+                  stop.activity.slice(1)}
+            </h2>
+            <h2>
+              {stop.deliveryInfo.attempted
+                ? stop.deliveryInfo.state
+                    .split("_")
+                    .map((s) => {
+                      return s.charAt(0).toUpperCase() + s.slice(1);
+                    })
+                    .join(" ") +
+                  " at " +
+                  new Date(
+                    stop.deliveryInfo.attemptedAt! * 1000,
+                  ).toLocaleString()
+                : "Not Attempted"}
+            </h2>
+          </div>
         ))}
       </div>
     </>
