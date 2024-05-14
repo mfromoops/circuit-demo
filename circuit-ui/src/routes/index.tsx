@@ -19,14 +19,13 @@ export const useCircuit = routeLoader$(async ({ env, url }) => {
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   const resp = await circuitsAPI.listPlans(token as string);
-  console.log({ resp });
-  if (!resp.plans) {
+  if (resp.plans === undefined || resp.plans === null) {
     resp.plans = [];
   }
   let nextPageToken = resp.nextPageToken;
   while (nextPageToken) {
     const next = await circuitsAPI.listPlans(nextPageToken);
-    if (!next.plans) {
+    if (next.plans === undefined || next.plans === null) {
       next.plans = [];
     }
     resp.plans = resp.plans.concat(next.plans);
@@ -92,24 +91,27 @@ export default component$(() => {
   return (
     <div>
       <div>
-        {false && (
-          <button
-            onClick$={() => {
-              const formData = new FormData();
-              formData.append("plans", JSON.stringify(plans.value.plans));
-              deleteAllPlans.submit(formData);
-            }}
-          >
-            Delete All Plans
-          </button>
-        )}
+        {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          false && (
+            <button
+              onClick$={() => {
+                const formData = new FormData();
+                formData.append("plans", JSON.stringify(plans.value.plans));
+                deleteAllPlans.submit(formData);
+              }}
+            >
+              Delete All Plans
+            </button>
+          )
+        }
       </div>
       <div class="flex gap-5 px-5">
         <div class="mb-5 grid flex-1 gap-2">
-          <div class="flex justify-between px-5">
-            <button
+          <div class="mb-5 flex justify-between">
+            <Button
               class={twMerge(
-                "h-10 rounded-md bg-[#f99d1d] px-5 text-white shadow-md hover:shadow-lg",
+                "w-32 bg-[#f99d1d]",
                 !navState.value.canGoBack
                   ? "pointer-events-none opacity-50 shadow-none"
                   : "",
@@ -120,12 +122,12 @@ export default component$(() => {
               }}
             >
               Previous
-            </button>
+            </Button>
             <h1 class="text-center text-lg">Circuit Plans</h1>
-            <button
+            <Button
               disabled={!navState.value.canGoForward}
               class={twMerge(
-                "h-10 rounded-md bg-[#f99d1d] px-5 text-white shadow-md hover:shadow-lg",
+                "w-32 bg-[#f99d1d]",
                 !navState.value.canGoForward
                   ? "pointer-events-none opacity-50 shadow-none"
                   : "",
@@ -135,29 +137,39 @@ export default component$(() => {
               }}
             >
               Next
-            </button>
+            </Button>
           </div>
-          {plans.value.plans.map((plan) => (
-            <Link href={plan.id} key={plan.id} class="bg-white p-2 shadow-md">
-              <h2 class="mb-5 text-xl">{plan.title}</h2>
-              <p>
-                Planned for {plan.starts.day}/{plan.starts.month}/
-                {plan.starts.year}
-              </p>
-              <p>
-                {plan.optimization.slice(0, 1).toUpperCase() +
-                  plan.optimization.slice(1)}
-              </p>
-              <p>{plan.distributed ? "Distributed" : "Not Distributed"}</p>
-              {plan.drivers.length > 0 ? (
-                <p>
-                  Assigned Drivers {plan.drivers.map((d) => d.email).join(", ")}
-                </p>
-              ) : (
-                <p>No Drivers Assigned</p>
-              )}
-            </Link>
-          ))}
+          {plans.value.plans.length === 0 ? (
+            <Card>
+              <CardHeading>No Plans</CardHeading>
+              No Plans are available at this time
+            </Card>
+          ) : (
+            plans.value.plans.map((plan) => (
+              <Link href={plan.id} key={plan.id}>
+                <Card>
+                  <CardHeading>{plan.title}</CardHeading>
+                  <p>
+                    Planned for {plan.starts.day}/{plan.starts.month}/
+                    {plan.starts.year}
+                  </p>
+                  <p>
+                    {plan.optimization.slice(0, 1).toUpperCase() +
+                      plan.optimization.slice(1)}
+                  </p>
+                  <p>{plan.distributed ? "Distributed" : "Not Distributed"}</p>
+                  {plan.drivers.length > 0 ? (
+                    <p>
+                      Assigned Drivers{" "}
+                      {plan.drivers.map((d) => d.email).join(", ")}
+                    </p>
+                  ) : (
+                    <p>No Drivers Assigned</p>
+                  )}
+                </Card>
+              </Link>
+            ))
+          )}
         </div>
         <div>
           <Card>

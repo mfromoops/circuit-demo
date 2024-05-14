@@ -1,6 +1,6 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { routeAction$, routeLoader$, useNavigate } from "@builder.io/qwik-city";
-import { DriverObject } from "~/business-logic/types";
+import type { DriverObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import { Button } from "~/components/ui/UIComponents";
 
@@ -48,66 +48,72 @@ export default component$(() => {
       <div class="grid grid-cols-2 gap-5 px-5">
         <div>
           Drivers Available
-          {drivers.value &&
-            drivers.value.drivers.drivers.map((driver) => (
-              <div key={driver.id} class="my-2 grid bg-white p-5 shadow-md">
-                <div>{driver.name}</div>
-                <div>{driver.email}</div>
-                <div>{driver.phone}</div>
-                <div>{driver.active ? "Active" : "Not Active"}</div>
-                <Button
-                  class="mt-4 bg-[#f99d1d]"
-                  onClick$={() => {
-                    drivers.value.activeDrivers.drivers.push(driver);
-                    drivers.value.drivers.drivers =
-                      drivers.value.drivers.drivers.filter(
-                        (d) => d.id !== driver.id,
-                      );
-                    selectedDrivers.value.push(driver);
-                    manageDrivers.submit({
-                      drivers: selectedDrivers.value.map(
-                        (d) => d.id as `drivers/${string}`,
-                      ),
-                    });
-                  }}
-                >
-                  Add Driver
-                </Button>
-              </div>
-            ))}
+          {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            drivers.value &&
+              drivers.value.drivers.drivers.map((driver) => (
+                <div key={driver.id} class="my-2 grid bg-white p-5 shadow-md">
+                  <div>{driver.name}</div>
+                  <div>{driver.email}</div>
+                  <div>{driver.phone}</div>
+                  <div>{driver.active ? "Active" : "Not Active"}</div>
+                  <Button
+                    class="mt-4 bg-[#f99d1d]"
+                    onClick$={() => {
+                      drivers.value.activeDrivers.drivers.push(driver);
+                      drivers.value.drivers.drivers =
+                        drivers.value.drivers.drivers.filter(
+                          (d) => d.id !== driver.id,
+                        );
+                      selectedDrivers.value.push(driver);
+                      manageDrivers.submit({
+                        drivers: selectedDrivers.value.map(
+                          (d) => d.id as `drivers/${string}`,
+                        ),
+                      });
+                    }}
+                  >
+                    Add Driver
+                  </Button>
+                </div>
+              ))
+          }
         </div>
 
         <div>
           Selected Drivers
-          {drivers.value &&
-            drivers.value.activeDrivers.drivers.map((driver) => (
-              <div key={driver.id} class="my-2 grid bg-white p-5 shadow-md">
-                <div>{driver.name}</div>
-                <div>{driver.email}</div>
-                <div>{driver.phone}</div>
-                <div>{driver.active ? "Active" : "Not Active"}</div>
-                <Button
-                  class="mt-4 bg-red-500"
-                  onClick$={() => {
-                    drivers.value.drivers.drivers.push(driver);
-                    drivers.value.activeDrivers.drivers =
-                      drivers.value.activeDrivers.drivers.filter(
+          {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            drivers.value &&
+              drivers.value.activeDrivers.drivers.map((driver) => (
+                <div key={driver.id} class="my-2 grid bg-white p-5 shadow-md">
+                  <div>{driver.name}</div>
+                  <div>{driver.email}</div>
+                  <div>{driver.phone}</div>
+                  <div>{driver.active ? "Active" : "Not Active"}</div>
+                  <Button
+                    class="mt-4 bg-red-500"
+                    onClick$={() => {
+                      drivers.value.drivers.drivers.push(driver);
+                      drivers.value.activeDrivers.drivers =
+                        drivers.value.activeDrivers.drivers.filter(
+                          (d) => d.id !== driver.id,
+                        );
+                      selectedDrivers.value = selectedDrivers.value.filter(
                         (d) => d.id !== driver.id,
                       );
-                    selectedDrivers.value = selectedDrivers.value.filter(
-                      (d) => d.id !== driver.id,
-                    );
-                    manageDrivers.submit({
-                      drivers: selectedDrivers.value.map(
-                        (d) => d.id as `drivers/${string}`,
-                      ),
-                    });
-                  }}
-                >
-                  Remove Driver
-                </Button>
-              </div>
-            ))}
+                      manageDrivers.submit({
+                        drivers: selectedDrivers.value.map(
+                          (d) => d.id as `drivers/${string}`,
+                        ),
+                      });
+                    }}
+                  >
+                    Remove Driver
+                  </Button>
+                </div>
+              ))
+          }
         </div>
       </div>
     </>

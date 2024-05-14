@@ -5,7 +5,7 @@ import {
   routeLoader$,
   type DocumentHead,
 } from "@builder.io/qwik-city";
-import { StopObject } from "~/business-logic/types";
+import type { StopObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import { Button } from "~/components/ui/UIComponents";
 

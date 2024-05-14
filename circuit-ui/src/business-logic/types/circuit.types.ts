@@ -34,8 +34,9 @@ export type ListPlansResponse = {
         optimization: string;
         drivers: DriverObject[];
       })[]
-    | undefined;
-  nextPageToken: string;
+    | undefined
+    | null;
+  nextPageToken: string | null | undefined;
 };
 export type RouteResponse = {
   id: string;

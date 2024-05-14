@@ -1,8 +1,9 @@
-import { component$ } from "@builder.io/qwik";
+import { component$, useSignal } from "@builder.io/qwik";
 import { routeAction$, routeLoader$ } from "@builder.io/qwik-city";
 import { CircuitAPI } from "~/business-logic/utils";
 import type { OrderInfo } from "~/business-logic/utils/directus.utils";
 import { DirectusClient } from "~/business-logic/utils/directus.utils";
+import { Button, Card, CardHeading } from "~/components/ui/UIComponents";
 
 export const useCreatePlan = routeAction$(async (data, { env }) => {
   const orders = data.orders as [string, OrderInfo[]][];
@@ -83,51 +84,67 @@ export const useOrders = routeLoader$(async (context) => {
 });
 
 export default component$(() => {
+  const isCreating = useSignal(false);
   const stores = useOrders();
   const createPlan = useCreatePlan();
   return (
     <div class="mx-5 pb-5">
       <div class="flex justify-between">
         <h1>Orders</h1>
-        <button
-          onClick$={() =>
-            createPlan.submit({ orders: Array.from(stores.value) })
-          }
-        >
-          Create Plan
-        </button>
+        {stores.value.size > 0 && (
+          <Button
+            class="bg-[#f99d1d]"
+            disabled={isCreating.value}
+            onClick$={() =>
+              createPlan.submit({ orders: Array.from(stores.value) })
+            }
+          >
+            {isCreating.value ? "Creating Plan" : "Create Plan"}
+          </Button>
+        )}
       </div>
-      {Array.from(stores.value.keys()).map((key) => {
-        const order = stores.value.get(key)![0];
-        const storeOrders = stores.value.get(key);
-        return (
-          <>
-            <h1 class="my-5 text-xl">{order.order.store_id.name}</h1>
-            <h3>{order.order.store_id.address}</h3>
-            {storeOrders?.map((order) => (
-              <div key={order.id} class="my-2 rounded-md border p-2 shadow-md">
-                <p>
-                  {order.client.name} {order.client.last_names}
-                </p>
-                <p>{order.order.store_id.name}</p>
-                <p>{order.order_total}</p>
-                <p>{order.order.store_id.address}</p>
-                <p>{order.order.store_id.town}</p>
-                <p>{order.client_paid ? "Paid" : "Not Paid"}</p>
-                <p>{order.order.delivery_location}</p>
-                <p>
-                  {order.planId ? "Assigned to Plan" : "Not Assigned to Plan"}
-                </p>
-                <p>
-                  {order.routeId
-                    ? "Assigned to Route"
-                    : "Not Assigned to Route"}
-                </p>
-              </div>
-            ))}
-          </>
-        );
-      })}
+      {stores.value.size === 0 ? (
+        <Card class="mt-5">
+          <CardHeading>No Orders</CardHeading>
+          No Orders are available at this time
+        </Card>
+      ) : (
+        Array.from(stores.value.keys()).map((key) => {
+          const order = stores.value.get(key)![0];
+          const storeOrders = stores.value.get(key);
+          return (
+            <>
+              <h1 class="mb-2 text-xl">{order.order.store_id.name}</h1>
+
+              {storeOrders?.map((order) => (
+                <Card key={order.id}>
+                  <CardHeading>
+                    {order.client.name} {order.client.last_names}
+                  </CardHeading>
+                  <div class="flex flex-col gap-2">
+                    <div>
+                      <h3 class=" text-sm font-normal tracking-wide text-gray-500">
+                        Location
+                      </h3>
+                      <p>{order.order.delivery_location}</p>
+                    </div>
+                    <div>
+                      <h3 class=" text-sm font-normal tracking-wide text-gray-500">
+                        Order Status
+                      </h3>
+                      <p>
+                        {order.planId
+                          ? "Assigned to Plan"
+                          : "Not Assigned to Plan"}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </>
+          );
+        })
+      )}
     </div>
   );
 });
