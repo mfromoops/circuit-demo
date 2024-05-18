@@ -18,7 +18,7 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
     return undefined;
   }
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!plan.routes || plan.routes.length == 0) {
+  if (!plan.routes) {
     return undefined;
   }
   const routes = Promise.all(
