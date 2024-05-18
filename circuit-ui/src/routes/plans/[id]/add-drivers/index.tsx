@@ -2,6 +2,7 @@ import { component$, useSignal } from "@builder.io/qwik";
 import { routeAction$, routeLoader$, useNavigate } from "@builder.io/qwik-city";
 import type { DriverObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
+import { DirectusClient } from "~/business-logic/utils/directus.utils";
 import { Button } from "~/components/ui/UIComponents";
 
 export const useListDrivers = routeLoader$(async ({ env, url }) => {
@@ -24,8 +25,16 @@ export const useAddDrivers = routeAction$(async (body, context) => {
   const drivers = body.drivers as `drivers/${string}`[];
   const planId = context.url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
+  const access_token = env.get("DIRECTUS_TOKEN")!;
+  const directusClient = new DirectusClient(access_token);
+  const depot_id = await directusClient
+    .findOrderByPlanId(`plans/${planId}`)
+    .then((res) => {
+      console.log({ res });
+      return res[0].order.store_id.depot_id;
+    });
   const circuitsAPI = new CircuitAPI(apiKey as string);
-  return circuitsAPI.updatePlan(drivers, `plans/${planId}`);
+  return circuitsAPI.updatePlan(drivers, `plans/${planId}`, depot_id);
 });
 
 export default component$(() => {

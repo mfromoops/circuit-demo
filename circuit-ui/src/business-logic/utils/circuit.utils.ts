@@ -162,16 +162,25 @@ export class CircuitAPI {
       },
     }).then((res) => res.json());
   }
-  updatePlan(drivers: `drivers/${string}`[], planID: `plans/${string}`) {
+  updatePlan(
+    drivers: `drivers/${string}`[],
+    planID: `plans/${string}`,
+    depot_id?: string,
+  ) {
+    const body = {
+      drivers,
+    } as Record<string, any>;
+    if (depot_id) {
+      console.log({ depot_id });
+      body.depot = depot_id;
+    }
     return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}`, {
       method: "PATCH",
       headers: {
         Authorization: BasicAuthentication(this.apiKey, ""),
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        drivers,
-      }),
+      body: JSON.stringify(body),
     }).then((res) => res.json());
   }
 }

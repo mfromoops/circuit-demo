@@ -17,6 +17,10 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
   if (!plan) {
     return undefined;
   }
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (!plan.routes || plan.routes.length == 0) {
+    return undefined;
+  }
   const routes = Promise.all(
     plan.routes.map((route) => circuitsAPI.getRoute(route)),
   );
@@ -133,6 +137,7 @@ export default component$(() => {
           </p>
           <p>{plan.value.optimization}</p>
           <p>{plan.value.distributed ? "Distributed" : "Not Distributed"}</p>
+          <p>{plan.value.depot}</p>
           {plan.value.optimization === "creating" && (
             <div class="flex gap-5">
               <Button

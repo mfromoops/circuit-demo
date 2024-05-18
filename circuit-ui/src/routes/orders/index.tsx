@@ -1,5 +1,6 @@
 import { component$, useSignal } from "@builder.io/qwik";
-import { routeAction$, routeLoader$ } from "@builder.io/qwik-city";
+import { routeAction$, routeLoader$, useNavigate } from "@builder.io/qwik-city";
+import type { PlanObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import type { OrderInfo } from "~/business-logic/utils/directus.utils";
 import { DirectusClient } from "~/business-logic/utils/directus.utils";
@@ -15,7 +16,7 @@ export const useCreatePlan = routeAction$(async (data, { env }) => {
     const circuit = new CircuitAPI(env.get("CIRCUIT_API_KEY") as string);
     const directus = new DirectusClient(env.get("DIRECTUS_TOKEN") as string);
     const today = new Date();
-    const plan = await circuit.createPlan({
+    const plan: PlanObject & { id: string } = await circuit.createPlan({
       title: `${name}`,
       starts: {
         day: today.getDate(),
@@ -49,7 +50,8 @@ export const useCreatePlan = routeAction$(async (data, { env }) => {
     await circuit.createStop(
       {
         address: {
-          addressLineOne: tmpOrder[0].order.store_id.town,
+          addressLineOne: tmpOrder[0].order.store_id.address,
+          addressLineTwo: tmpOrder[0].order.store_id.town,
         },
         activity: "pickup",
         optimizationOrder: "first",
@@ -61,7 +63,13 @@ export const useCreatePlan = routeAction$(async (data, { env }) => {
       },
       plan.id,
     );
+    if (orders.length == 1) {
+      return plan;
+    }
   }
+  return {
+    id: "plans",
+  };
 });
 
 export const useOrders = routeLoader$(async (context) => {
@@ -87,6 +95,7 @@ export default component$(() => {
   const isCreating = useSignal(false);
   const stores = useOrders();
   const createPlan = useCreatePlan();
+  const nav = useNavigate();
   return (
     <div class="mx-5 pb-5">
       <div class="flex justify-between">
@@ -96,7 +105,13 @@ export default component$(() => {
             class="bg-[#f99d1d]"
             disabled={isCreating.value}
             onClick$={() =>
-              createPlan.submit({ orders: Array.from(stores.value) })
+              createPlan
+                .submit({ orders: Array.from(stores.value) })
+                .then((res) => {
+                  res.value.depot
+                    ? nav("/" + res.value.id + "/add-drivers")
+                    : nav("/");
+                })
             }
           >
             {isCreating.value ? "Creating Plan" : "Create Plan"}
@@ -113,35 +128,36 @@ export default component$(() => {
           const order = stores.value.get(key)![0];
           const storeOrders = stores.value.get(key);
           return (
-            <>
+            <div class="mx-5 mt-5 p-5" key={key}>
               <h1 class="mb-2 text-xl">{order.order.store_id.name}</h1>
-
-              {storeOrders?.map((order) => (
-                <Card key={order.id}>
-                  <CardHeading>
-                    {order.client.name} {order.client.last_names}
-                  </CardHeading>
-                  <div class="flex flex-col gap-2">
-                    <div>
-                      <h3 class=" text-sm font-normal tracking-wide text-gray-500">
-                        Location
-                      </h3>
-                      <p>{order.order.delivery_location}</p>
+              <div class="flex flex-col gap-5">
+                {storeOrders?.map((order) => (
+                  <Card key={order.id}>
+                    <CardHeading>
+                      {order.client.name} {order.client.last_names}
+                    </CardHeading>
+                    <div class="flex flex-col gap-2">
+                      <div>
+                        <h3 class=" text-sm font-normal tracking-wide text-gray-500">
+                          Location
+                        </h3>
+                        <p>{order.order.delivery_location}</p>
+                      </div>
+                      <div>
+                        <h3 class=" text-sm font-normal tracking-wide text-gray-500">
+                          Order Status
+                        </h3>
+                        <p>
+                          {order.planId
+                            ? "Assigned to Plan"
+                            : "Not Assigned to Plan"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 class=" text-sm font-normal tracking-wide text-gray-500">
-                        Order Status
-                      </h3>
-                      <p>
-                        {order.planId
-                          ? "Assigned to Plan"
-                          : "Not Assigned to Plan"}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </>
+                  </Card>
+                ))}
+              </div>
+            </div>
           );
         })
       )}

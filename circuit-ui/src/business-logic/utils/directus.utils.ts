@@ -128,6 +128,35 @@ export class DirectusClient {
       }),
     );
   }
+  findOrderByPlanId(planId: string) {
+    return this.client.request(
+      readItems("order_info", {
+        fields: [
+          "id",
+          { client: ["name", "last_names", "id", "email", "phone_number"] },
+          {
+            order: [
+              "Order_id",
+              "pickup_location",
+              "delivery_location",
+              { store_id: ["name", "address", "town", "store_id", "depot_id"] },
+            ],
+          },
+          "order_total",
+          "client_paid",
+        ],
+        filter: {
+          _and: [
+            {
+              planId: {
+                _eq: planId,
+              },
+            },
+          ],
+        },
+      }),
+    );
+  }
   getOrderItems(order_id: string) {
     return this.client.request(
       readItems("Order_items", {
