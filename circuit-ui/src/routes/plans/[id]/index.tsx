@@ -138,20 +138,21 @@ export default component$(() => {
           <p>{plan.value.optimization}</p>
           <p>{plan.value.distributed ? "Distributed" : "Not Distributed"}</p>
           <p>{plan.value.depot}</p>
-          {plan.value.optimization === "creating" && (
-            <div class="flex gap-5">
-              <Button
-                class="bg-green-700"
-                onClick$={() => {
-                  optimizePlan.submit({ ...plan.value }).then(() => {
-                    distributePlan.submit({ ...plan.value });
-                  });
-                }}
-              >
-                Start Route
-              </Button>
-            </div>
-          )}
+          {plan.value.optimization === "creating" &&
+            plan.value.drivers.length > 0 && (
+              <div class="flex gap-5">
+                <Button
+                  class="bg-green-700"
+                  onClick$={() => {
+                    optimizePlan.submit({ ...plan.value }).then(() => {
+                      distributePlan.submit({ ...plan.value });
+                    });
+                  }}
+                >
+                  Start Route
+                </Button>
+              </div>
+            )}
         </div>
         <h1 class="text-center text-lg">Stops</h1>
         {plan.value.stops.map((stop) => (

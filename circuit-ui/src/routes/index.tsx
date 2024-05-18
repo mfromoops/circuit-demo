@@ -18,13 +18,13 @@ export const useCircuit = routeLoader$(async ({ env, url }) => {
   const token = url.searchParams.get("token");
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
-  const resp = await circuitsAPI.listPlans(token as string);
+  const resp = await circuitsAPI.listTodaysPlans(token as string);
   if (resp.plans === undefined || resp.plans === null) {
     resp.plans = [];
   }
   let nextPageToken = resp.nextPageToken;
   while (nextPageToken) {
-    const next = await circuitsAPI.listPlans(nextPageToken);
+    const next = await circuitsAPI.listTodaysPlans(nextPageToken);
     if (next.plans === undefined || next.plans === null) {
       next.plans = [];
     }
@@ -45,8 +45,9 @@ export const useCreatePlan = routeAction$(async (data, { env, json }) => {
   const starts = {
     year: date.getFullYear(),
     month: date.getMonth() + 1,
-    day: date.getDate(),
+    day: date.getDate() + 1,
   };
+  console.log({ starts });
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   await circuitsAPI.createPlan({

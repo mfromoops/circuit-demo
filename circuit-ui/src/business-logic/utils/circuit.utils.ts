@@ -124,6 +124,38 @@ export class CircuitAPI {
       },
     ).then((res) => res.json());
   }
+  async listTodaysPlans(token?: string): Promise<ListPlansResponse> {
+    const date = new Date();
+    // format should be YYYY-MM-DD
+    const today = date
+      .toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      })
+      .split("/");
+    const formattedDate = [
+      today[2],
+      today[0].length == 1 ? "0" + today[0] : today[0],
+      today[1].length == 1 ? "0" + today[1] : today[1],
+    ].join("-");
+    // [today[]].join("-");
+    console.log({ formattedDate });
+
+    const res = await fetch(
+      `https://api.getcircuit.com/public/v0.2b/plans?filter[startsGte]=${formattedDate}${token ? "&pageToken=" + token : ""}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: BasicAuthentication(this.apiKey, ""),
+          "Content-Type": "application/json",
+        },
+      },
+    ).then((res) => res.json());
+    console.log({ res });
+    return res;
+  }
+
   listStops(planID: `plans/${string}`): Promise<ListStopsResponse> {
     return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}/stops`, {
       method: "GET",
