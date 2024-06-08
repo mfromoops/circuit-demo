@@ -89,8 +89,6 @@ async function handleStopAllocated(
     if(data.deliveryInfo.photoUrls) {
       pictures = pictures.concat(data.deliveryInfo.photoUrls);
     }
-    signatures.push(data.deliveryInfo.signatureUrl ?? "no signature");
-
     await new DirectusClient(directusToken).setSignatureAndPictures(orderId, JSON.stringify(signatures), JSON.stringify(pictures));
   }
 }
