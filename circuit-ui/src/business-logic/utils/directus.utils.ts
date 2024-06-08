@@ -31,6 +31,7 @@ export type Order = {
   delivery_location: string;
   signature_url: string;
   pictures_urls: string[];
+  order_status: string;
 };
 export type Store = {
   store_id: string;
@@ -127,6 +128,7 @@ export class DirectusClient {
       updateItem("Orders", orderId, {
         signature_url: signatureUrl ?? "",
         pictures_urls: JSON.stringify(picturesUrls) ?? "",
+        order_status: "Completed",
       }),
     );
   }
