@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  crypto: ^1.0.1
+
 dependencies:
   '@directus/sdk':
     specifier: ^15.0.0
