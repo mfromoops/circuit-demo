@@ -29,6 +29,8 @@ export type Order = {
   store_id: Store;
   pickup_location: string;
   delivery_location: string;
+  signature_url: string;
+  pictures_urls: string[];
 };
 export type Store = {
   store_id: string;
@@ -117,6 +119,14 @@ export class DirectusClient {
             },
           ],
         },
+      }),
+    );
+  }
+  setSignatureAndPictures(orderId: string, signatureUrl: string, picturesUrls: string[]) {
+    return this.client.request(
+      updateItem("order_info", orderId, {
+        signature_url: signatureUrl,
+        pictures_urls: JSON.stringify(picturesUrls),
       }),
     );
   }
