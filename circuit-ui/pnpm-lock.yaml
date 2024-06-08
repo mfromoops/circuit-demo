@@ -26,6 +26,9 @@ dependencies:
   flowbite:
     specifier: ^2.2.1
     version: 2.3.0
+  safe-compare:
+    specifier: ^1.1.4
+    version: 1.1.4
   sqlite3:
     specifier: ^5.1.7
     version: 5.1.7
@@ -52,6 +55,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.11.6
     version: 20.12.8
+  '@types/safe-compare':
+    specifier: ^1.1.2
+    version: 1.1.2
   '@typescript-eslint/eslint-plugin':
     specifier: ^6.19.1
     version: 6.21.0(@typescript-eslint/parser@6.21.0)(eslint@8.57.0)(typescript@5.3.3)
@@ -1351,6 +1357,10 @@ packages:
       undici-types: 5.26.5
     dev: true
 
+  /@types/safe-compare@1.1.2:
+    resolution: {integrity: sha512-kK/IM1+pvwCMom+Kezt/UlP8LMEwm8rP6UgGbRc6zUnhU/csoBQ5rWgmD2CJuHxiMiX+H1VqPGpo0kDluJGXYA==}
+    dev: true
+
   /@types/semver@7.5.8:
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
     dev: true
@@ -1790,6 +1800,21 @@ packages:
       node-releases: 2.0.14
       update-browserslist-db: 1.0.15(browserslist@4.23.0)
     dev: true
+
+  /buffer-alloc-unsafe@1.1.0:
+    resolution: {integrity: sha512-TEM2iMIEQdJ2yjPJoSIsldnleVaAk1oW3DBVUykyOLsEsFmEc9kn+SFFPz+gl54KQNxlDnAwCXosOS9Okx2xAg==}
+    dev: false
+
+  /buffer-alloc@1.2.0:
+    resolution: {integrity: sha512-CFsHQgjtW1UChdXgbyJGtnm+O/uLQeZdtbDo8mfUgYXCHSM1wgrVxXm6bSyrUuErEb+4sYVGCzASBRot7zyrow==}
+    dependencies:
+      buffer-alloc-unsafe: 1.1.0
+      buffer-fill: 1.0.0
+    dev: false
+
+  /buffer-fill@1.0.0:
+    resolution: {integrity: sha512-T7zexNBwiiaCOGDg9xNX9PBmjrubblRkENuptryuI64URkXDFum9il/JGL8Lm8wYfAXpredVXXZz7eMHilimiQ==}
+    dev: false
 
   /buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
@@ -4700,6 +4725,12 @@ packages:
 
   /safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
+    dev: false
+
+  /safe-compare@1.1.4:
+    resolution: {integrity: sha512-b9wZ986HHCo/HbKrRpBJb2kqXMK9CEWIE1egeEvZsYn69ay3kdfl9nG3RyOcR+jInTDf7a86WQ1d4VJX7goSSQ==}
+    dependencies:
+      buffer-alloc: 1.2.0
     dev: false
 
   /safe-regex-test@1.0.3:
