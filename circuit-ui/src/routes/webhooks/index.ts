@@ -1,5 +1,5 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
-import crypto, { sign } from "crypto";
+import { createHmac } from "crypto";
 export const onPost: RequestHandler = async ({ json, request, env }) => {
    console.log(JSON.stringify(request.headers));  
    const signature = request.headers.get("circuit-signature");
@@ -10,8 +10,9 @@ export const onPost: RequestHandler = async ({ json, request, env }) => {
    const secret = env.get("CICRCUIT_SECRET_KEY") as string;
    const message = await request.text();
    console.log({ message });
-   const expectedSignature = crypto
-    .createHmac('sha256', secret)
+
+   const expectedSignature = 
+    createHmac('sha256', secret)
     .update(message)
     .digest('hex')
   console.log({ expectedSignature, signature });

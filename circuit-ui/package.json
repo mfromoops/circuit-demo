@@ -47,7 +47,7 @@
     "axios": "^1.6.7",
     "bun": "^1.0.26",
     "clsx": "^2.1.0",
-    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0",
     "flowbite": "^2.2.1",
     "sqlite3": "^5.1.7",
     "tailwind-merge": "^2.2.1"
