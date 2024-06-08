@@ -125,8 +125,8 @@ export class DirectusClient {
   setSignatureAndPictures(orderId: string, signatureUrl: string, picturesUrls: string[]) {
     return this.client.request(
       updateItem("order_info", orderId, {
-        signature_url: signatureUrl,
-        pictures_urls: JSON.stringify(picturesUrls),
+        signature_url: signatureUrl ?? "",
+        pictures_urls: JSON.stringify(picturesUrls) ?? "",
       }),
     );
   }

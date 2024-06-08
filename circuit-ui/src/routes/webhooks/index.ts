@@ -1,4 +1,5 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
+import { sign } from "crypto";
 import cryptojs from "crypto-js";
 import { StopObject } from "~/business-logic/types";
 import { DirectusClient } from "~/business-logic/utils/directus.utils";
@@ -75,6 +76,10 @@ async function handleStopAllocated(
   directusToken: string
 ) {
   if (type === "stop.attempted_delivery") {
+    console.log({data: {
+      signatureUrl: data.deliveryInfo.signatureUrl ?? "no signature",
+      picturesUrls: data.deliveryInfo.photoUrls ?? "no pictures",
+    }})
     await new DirectusClient(directusToken).setSignatureAndPictures(orderId, data.deliveryInfo.signatureUrl, (data.deliveryInfo.photoUrls));
   }
 }
