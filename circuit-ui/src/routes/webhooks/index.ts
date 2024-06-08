@@ -1,5 +1,5 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
-import { createHmac } from "crypto";
+import cryptojs from "crypto-js";
 export const onPost: RequestHandler = async ({ json, request, env }) => {
    console.log(JSON.stringify(request.headers));  
    const signature = request.headers.get("circuit-signature");
@@ -11,10 +11,7 @@ export const onPost: RequestHandler = async ({ json, request, env }) => {
    const message = await request.text();
    console.log({ message });
 
-   const expectedSignature = 
-    createHmac('sha256', secret)
-    .update(message)
-    .digest('hex')
+   const expectedSignature = cryptojs.HmacSHA256(message, secret).toString();
   console.log({ expectedSignature, signature });
 
   json(200, { message: "Webhook received" });
