@@ -2,6 +2,7 @@ import type { RestClient, StaticTokenClient } from "@directus/sdk";
 import {
   createDirectus,
   createItem,
+  readItem,
   readItems,
   rest,
   staticToken,
@@ -30,7 +31,7 @@ export type Order = {
   pickup_location: string;
   delivery_location: string;
   signature_url: string;
-  pictures_urls: string[];
+  pictures_urls: string;
   order_status: string;
 };
 export type Store = {
@@ -65,6 +66,17 @@ export class DirectusClient {
     this.client = createDirectus<DirectusSchema>("https://api.loadds.com")
       .with(rest())
       .with(staticToken(access_token));
+  }
+  getOrder(orderId: string) {
+    return this.client.request(
+      readItem("Orders", orderId, {
+        fields: [
+          "signature_url",
+          "pictures_urls",
+          "Order_id",
+        ]
+      }),
+    );
   }
   getStores() {
     return this.client.request(
@@ -123,11 +135,15 @@ export class DirectusClient {
       }),
     );
   }
-  setSignatureAndPictures(orderId: string, signatureUrl: string, picturesUrls: string[]) {
+  setSignatureAndPictures(
+    orderId: string,
+    signatureUrl: string,
+    picturesUrls: string,
+  ) {
     return this.client.request(
       updateItem("Orders", orderId, {
-        signature_url: signatureUrl ?? "",
-        pictures_urls: JSON.stringify(picturesUrls) ?? "",
+        signature_url: signatureUrl,
+        pictures_urls: picturesUrls,
         order_status: "Completed",
       }),
     );

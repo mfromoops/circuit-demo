@@ -1,5 +1,4 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
-import { sign } from "crypto";
 import cryptojs from "crypto-js";
 import { StopObject } from "~/business-logic/types";
 import { DirectusClient } from "~/business-logic/utils/directus.utils";
@@ -81,6 +80,17 @@ async function handleStopAllocated(
       signatureUrl: data.deliveryInfo.signatureUrl ?? "no signature",
       picturesUrls: data.deliveryInfo.photoUrls ?? "no pictures",
     }})
-    await new DirectusClient(directusToken).setSignatureAndPictures(orderId, data.deliveryInfo.signatureUrl, (data.deliveryInfo.photoUrls));
+    const order = await new DirectusClient(directusToken).getOrder(orderId);
+    const signatures = JSON.parse(order.signature_url ?? JSON.stringify([])) as string[];
+    let pictures = JSON.parse(order.pictures_urls ?? JSON.stringify([])) as string[];
+    if(data.deliveryInfo.signatureUrl) {
+      signatures.push(data.deliveryInfo.signatureUrl);
+    }
+    if(data.deliveryInfo.photoUrls) {
+      pictures = pictures.concat(data.deliveryInfo.photoUrls);
+    }
+    signatures.push(data.deliveryInfo.signatureUrl ?? "no signature");
+
+    await new DirectusClient(directusToken).setSignatureAndPictures(orderId, JSON.stringify(signatures), JSON.stringify(pictures));
   }
 }
