@@ -1,17 +1,18 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
 import cryptojs from "crypto-js";
-import safeCompare from "safe-compare";
 import { StopObject } from "~/business-logic/types";
 type WebhookEvent = {
-  type: "stop.allocated" | "stop.out_for_delivery" | "stop.attempted_delivery" | "test.send_event"
+  type:
+    | "stop.allocated"
+    | "stop.out_for_delivery"
+    | "stop.attempted_delivery"
+    | "test.send_event";
   version: string;
   created: number;
   data: StopObject;
 };
 
-
 export const onPost: RequestHandler = async ({ json, request, env }) => {
-  console.log(JSON.stringify(request.headers));
   const signature = request.headers.get("circuit-signature");
   if (!signature) {
     json(401, { message: "Signature not found" });
@@ -21,14 +22,8 @@ export const onPost: RequestHandler = async ({ json, request, env }) => {
   const secret = env.get("CICRCUIT_SECRET_KEY") as string;
   const message = await request.text();
   const expectedSignature = cryptojs.HmacSHA256(message, secret).toString();
-  if (!expectedSignature || expectedSignature.length !== signature.length) {
-    json(401, { message: "Signature not found" });
-    return;
-  }
-  
-
   const compareResult = safeCompare(expectedSignature, signature);
-  if(!compareResult) {
+  if (!compareResult) {
     json(401, { message: "Signature not found" });
     return;
   }
@@ -44,17 +39,40 @@ export const onPost: RequestHandler = async ({ json, request, env }) => {
   return;
 };
 
-async function handleStopAllocated(type: WebhookEvent["type"], data: WebhookEvent["data"]) {
-   const updateItem = {} as Record<string, any>;
-   console.log({ type, data });
-   if(type === "stop.attempted_delivery") {
-      if(data.deliveryInfo.signatureUrl) {
-         updateItem.signatureUrl = data.deliveryInfo.signatureUrl;
-      }
-      if(data.deliveryInfo.photoUrls) {
-         updateItem.photoUrls = JSON.stringify(data.deliveryInfo.photoUrls);
-      }
-   }
-   return updateItem;
-   
+function safeCompare(expectedSignature: string, signature: string) {
+  const encode = new TextEncoder();
+  const encodedExpectedSignature = encode.encode(btoa(expectedSignature));
+  const encodedSignature = encode.encode(btoa(signature));
+
+  let difference = -1;
+  if (encodedExpectedSignature.byteLength !== encodedSignature.byteLength) {
+    difference = 0;
+  }
+
+  const length = expectedSignature.length;
+  
+  
+  for (let i = 0; i < length; i++) {
+    if (encodedExpectedSignature.at(i) !== encodedSignature.at(i)) {
+      difference = i;
+    }
+  }
+  
+  return difference === -1;
+}
+
+async function handleStopAllocated(
+  type: WebhookEvent["type"],
+  data: WebhookEvent["data"],
+) {
+  const updateItem = {} as Record<string, any>;
+  if (type === "stop.attempted_delivery") {
+    if (data.deliveryInfo.signatureUrl) {
+      updateItem.signatureUrl = data.deliveryInfo.signatureUrl;
+    }
+    if (data.deliveryInfo.photoUrls) {
+      updateItem.photoUrls = JSON.stringify(data.deliveryInfo.photoUrls);
+    }
+  }
+  return updateItem;
 }
