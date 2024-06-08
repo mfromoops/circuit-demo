@@ -77,6 +77,7 @@ async function handleStopAllocated(
 ) {
   if (type === "stop.attempted_delivery") {
     console.log({data: {
+      orderId,
       signatureUrl: data.deliveryInfo.signatureUrl ?? "no signature",
       picturesUrls: data.deliveryInfo.photoUrls ?? "no pictures",
     }})
