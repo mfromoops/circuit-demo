@@ -13,6 +13,13 @@ type WebhookEvent = {
   data: StopObject;
 };
 
+export const onGet: RequestHandler = async ({ json }) => {
+  json(200, {
+    message: "Webhook received",
+  });
+  return;
+}
+
 export const onPost: RequestHandler = async ({ json, request, env }) => {
   const signature = request.headers.get("circuit-signature");
   if (!signature) {
