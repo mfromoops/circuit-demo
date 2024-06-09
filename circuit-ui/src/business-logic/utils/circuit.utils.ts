@@ -23,7 +23,7 @@ export class CircuitAPI {
     }).then((res) => res.json());
   }
   getDriver(driverID: string) {
-    return fetch("https://api.getcircuit.com/public/v0.2b/drivers/" + driverID, {
+    return fetch("https://api.getcircuit.com/public/v0.2b/" + driverID, {
       method: "GET",
       headers: {
         Authorization: BasicAuthentication(this.apiKey, ""),

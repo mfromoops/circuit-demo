@@ -47,11 +47,11 @@ export type RouteResponse = {
     completed: boolean;
     completedAt: string;
     distributed: boolean;
-    distributedAt: string;
+    distributedAt: number;
     notifiedRecipients: boolean;
     notifiedRecipientsAt: string;
     started: boolean;
-    startedAt: string;
+    startedAt: number;
   };
 };
 export type getPlanResponse = PlanObject & {

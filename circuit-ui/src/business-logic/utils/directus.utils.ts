@@ -58,6 +58,8 @@ export type DriverCompletedOrder = {
   driver_email: string;
   circuit_driver_id: string;
   circuit_stop_id: string;
+  started_at: string;
+  distributed_at: string;
 };
 
 type DirectusSchema = {
@@ -158,6 +160,8 @@ export class DirectusClient {
     driverEmail: string,
     circuitDriverId: string,
     circuitStopId: string,
+    startedAt: number,
+    distributedAt: number,
   ) {
     return this.client.request(
       createItem("driver_completed_orders", {
@@ -165,6 +169,8 @@ export class DirectusClient {
         driver_email: driverEmail,
         circuit_driver_id: circuitDriverId,
         circuit_stop_id: circuitStopId,
+        started_at: String(startedAt*1000),
+        distributed_at: String(distributedAt*1000),
       }),
     );
   }

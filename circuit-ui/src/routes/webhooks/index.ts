@@ -1,6 +1,6 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
 import cryptojs from "crypto-js";
-import { DriverObject, StopObject } from "~/business-logic/types";
+import { DriverObject, RouteResponse, StopObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
 import { DirectusClient } from "~/business-logic/utils/directus.utils";
 type WebhookEvent = {
@@ -11,7 +11,7 @@ type WebhookEvent = {
     | "test.send_event";
   version: string;
   created: number;
-  data: StopObject;
+  data: StopObject & { route: RouteResponse };
 };
 
 export const onGet: RequestHandler = async ({ json }) => {
@@ -102,25 +102,18 @@ async function handleStopAllocated(
     if (data.deliveryInfo.photoUrls) {
       pictures = pictures.concat(data.deliveryInfo.photoUrls);
     }
-    console.log('trying to save', data);
-    if (data.driver && data.id) {
-      console.log(data.driver);
+    if (data.route.driver && data.id) {
       const driver = (await new CircuitAPI(circuitAPIKey).getDriver(
-        data.driver,
+        data.route.driver,
       )) as DriverObject;
-      console.log(driver);
       const directusClient = new DirectusClient(directusToken);
-      console.log('saving', {
-        orderId,
-        driver,
-        id: data.id,
-        email: driver.email
-      });
       await directusClient.saveDriverOrder(
         orderId,
         driver.email,
-        data.driver,
+        data.route.driver,
         data.id,
+        data.route.state.startedAt,
+        data.route.state.distributedAt,
       );
       await new DirectusClient(directusToken).setSignatureAndPictures(
         orderId,
