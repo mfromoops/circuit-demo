@@ -113,7 +113,7 @@ async function handleStopAllocated(
         data.route.driver,
         data.id,
         data.route.state.startedAt,
-        data.route.state.distributedAt,
+        data.deliveryInfo.attemptedAt,
       );
       await new DirectusClient(directusToken).setSignatureAndPictures(
         orderId,
