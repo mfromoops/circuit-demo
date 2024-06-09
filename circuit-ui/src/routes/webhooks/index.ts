@@ -109,11 +109,20 @@ async function handleStopAllocated(
     if (data.deliveryInfo.photoUrls) {
       pictures = pictures.concat(data.deliveryInfo.photoUrls);
     }
+    console.log('trying to save');
     if (data.driver && data.id) {
+      console.log(data.driver);
       const driver = (await new CircuitAPI(circuitAPIKey).getDriver(
         data.driver,
       )) as DriverObject;
+      console.log(driver);
       const directusClient = new DirectusClient(directusToken);
+      console.log('saving', {
+        orderId,
+        driver,
+        id: data.id,
+        email: driver.email
+      });
       await directusClient.saveDriverOrder(
         orderId,
         driver.email,
