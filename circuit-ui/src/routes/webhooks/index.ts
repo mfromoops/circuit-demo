@@ -89,13 +89,6 @@ async function handleStopAllocated(
   circuitAPIKey: string,
 ) {
   if (type === "stop.attempted_delivery") {
-    console.log({
-      data: {
-        orderId,
-        signatureUrl: data.deliveryInfo.signatureUrl ?? "no signature",
-        picturesUrls: data.deliveryInfo.photoUrls ?? "no pictures",
-      },
-    });
     const order = await new DirectusClient(directusToken).getOrder(orderId);
     const signatures = JSON.parse(
       order.signature_url ?? JSON.stringify([]),
@@ -109,7 +102,7 @@ async function handleStopAllocated(
     if (data.deliveryInfo.photoUrls) {
       pictures = pictures.concat(data.deliveryInfo.photoUrls);
     }
-    console.log('trying to save');
+    console.log('trying to save', data);
     if (data.driver && data.id) {
       console.log(data.driver);
       const driver = (await new CircuitAPI(circuitAPIKey).getDriver(
