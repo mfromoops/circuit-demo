@@ -52,12 +52,21 @@ export type OrderItem = {
   weight: number;
 };
 
+export type DriverCompletedOrder = {
+  id: string;
+  orders: string;
+  driver_email: string;
+  circuit_driver_id: string;
+  circuit_stop_id: string;
+};
+
 type DirectusSchema = {
   order_info: OrderInfo[];
   Stores: Store[];
   Orders: Order[];
   Client: Client[];
   Order_items: OrderItem[];
+  driver_completed_orders: DriverCompletedOrder[];
 };
 export class DirectusClient {
   private client: RestClient<DirectusSchema> &
@@ -70,11 +79,7 @@ export class DirectusClient {
   getOrder(orderId: string) {
     return this.client.request(
       readItem("Orders", orderId, {
-        fields: [
-          "signature_url",
-          "pictures_urls",
-          "Order_id",
-        ]
+        fields: ["signature_url", "pictures_urls", "Order_id"],
       }),
     );
   }
@@ -145,6 +150,21 @@ export class DirectusClient {
         signature_url: signatureUrl,
         pictures_urls: picturesUrls,
         order_status: "Completed",
+      }),
+    );
+  }
+  saveDriverOrder(
+    orderId: string,
+    driverEmail: string,
+    circuitDriverId: string,
+    circuitStopId: string,
+  ) {
+    return this.client.request(
+      createItem("driver_completed_orders", {
+        orders: orderId,
+        driver_email: driverEmail,
+        circuit_driver_id: circuitDriverId,
+        circuit_stop_id: circuitStopId,
       }),
     );
   }

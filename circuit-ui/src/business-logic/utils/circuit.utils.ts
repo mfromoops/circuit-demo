@@ -22,6 +22,16 @@ export class CircuitAPI {
       body: JSON.stringify(plan),
     }).then((res) => res.json());
   }
+  getDriver(driverID: string) {
+    return fetch("https://api.getcircuit.com/public/v0.2b/drivers/" + driverID, {
+      method: "GET",
+      headers: {
+        Authorization: BasicAuthentication(this.apiKey, ""),
+        "Content-Type": "application/json",
+      },
+    }).then((res) => res.json());
+
+  }
   createStop(stop: Partial<StopObject>, planID: `plans/${string}`) {
     return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}/stops`, {
       method: "POST",

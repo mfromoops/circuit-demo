@@ -1,6 +1,7 @@
 import type { RequestHandler } from "@builder.io/qwik-city";
 import cryptojs from "crypto-js";
-import { StopObject } from "~/business-logic/types";
+import { DriverObject, StopObject } from "~/business-logic/types";
+import { CircuitAPI } from "~/business-logic/utils";
 import { DirectusClient } from "~/business-logic/utils/directus.utils";
 type WebhookEvent = {
   type:
@@ -18,7 +19,7 @@ export const onGet: RequestHandler = async ({ json }) => {
     message: "Webhook received",
   });
   return;
-}
+};
 
 export const onPost: RequestHandler = async ({ json, request, env }) => {
   const signature = request.headers.get("circuit-signature");
@@ -38,12 +39,18 @@ export const onPost: RequestHandler = async ({ json, request, env }) => {
 
   const data = JSON.parse(message) as WebhookEvent;
   const orderId = data.data.orderInfo?.sellerOrderId;
-  
-  if(!orderId) {
+
+  if (!orderId) {
     json(401, { message: "Order not found" });
     return;
   }
-  const updatedItem = await handleStopAllocated(data.type, data.data, orderId, env.get("DIRECTUS_TOKEN") as string);
+  const updatedItem = await handleStopAllocated(
+    data.type,
+    data.data,
+    orderId,
+    env.get("DIRECTUS_TOKEN") as string,
+    env.get("CIRCUIT_API_KEY") as string,
+  );
   json(200, {
     message: "Webhook received",
     success: expectedSignature === signature,
@@ -64,38 +71,60 @@ function safeCompare(expectedSignature: string, signature: string) {
   }
 
   const length = expectedSignature.length;
-  
-  
+
   for (let i = 0; i < length; i++) {
     if (encodedExpectedSignature.at(i) !== encodedSignature.at(i)) {
       difference = i;
     }
   }
-  
+
   return difference === -1;
 }
 
 async function handleStopAllocated(
   type: WebhookEvent["type"],
   data: WebhookEvent["data"],
-  orderId: string, 
-  directusToken: string
+  orderId: string,
+  directusToken: string,
+  circuitAPIKey: string,
 ) {
   if (type === "stop.attempted_delivery") {
-    console.log({data: {
-      orderId,
-      signatureUrl: data.deliveryInfo.signatureUrl ?? "no signature",
-      picturesUrls: data.deliveryInfo.photoUrls ?? "no pictures",
-    }})
+    console.log({
+      data: {
+        orderId,
+        signatureUrl: data.deliveryInfo.signatureUrl ?? "no signature",
+        picturesUrls: data.deliveryInfo.photoUrls ?? "no pictures",
+      },
+    });
     const order = await new DirectusClient(directusToken).getOrder(orderId);
-    const signatures = JSON.parse(order.signature_url ?? JSON.stringify([])) as string[];
-    let pictures = JSON.parse(order.pictures_urls ?? JSON.stringify([])) as string[];
-    if(data.deliveryInfo.signatureUrl) {
+    const signatures = JSON.parse(
+      order.signature_url ?? JSON.stringify([]),
+    ) as string[];
+    let pictures = JSON.parse(
+      order.pictures_urls ?? JSON.stringify([]),
+    ) as string[];
+    if (data.deliveryInfo.signatureUrl) {
       signatures.push(data.deliveryInfo.signatureUrl);
     }
-    if(data.deliveryInfo.photoUrls) {
+    if (data.deliveryInfo.photoUrls) {
       pictures = pictures.concat(data.deliveryInfo.photoUrls);
     }
-    await new DirectusClient(directusToken).setSignatureAndPictures(orderId, JSON.stringify(signatures), JSON.stringify(pictures));
+    if (data.driver && data.id) {
+      const driver = (await new CircuitAPI(circuitAPIKey).getDriver(
+        data.driver,
+      )) as DriverObject;
+      const directusClient = new DirectusClient(directusToken);
+      await directusClient.saveDriverOrder(
+        orderId,
+        driver.email,
+        data.driver,
+        data.id,
+      );
+      await new DirectusClient(directusToken).setSignatureAndPictures(
+        orderId,
+        JSON.stringify(signatures),
+        JSON.stringify(pictures),
+      );
+    }
   }
 }
