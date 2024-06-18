@@ -36,6 +36,11 @@ export const useCreatePlan = routeAction$(async (data, { env }) => {
           address: {
             addressLineOne: order.order.delivery_location,
           },
+          recipient: {
+            name: order.client.name + " " + order.client.last_names,
+            email: order.client.email,
+            phone: order.client.phone_number,
+          },
           orderInfo: {
             products: items.map((item) => item.name + " " + item.model),
             sellerName: order.order.store_id.name,
