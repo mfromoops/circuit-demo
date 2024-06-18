@@ -81,7 +81,6 @@ export const useOrders = routeLoader$(async (context) => {
   const access_token = context.env.get("DIRECTUS_TOKEN") as string;
   const directusClient = new DirectusClient(access_token);
   const orders = await directusClient.getOrders();
-  console.log({ orders });
   const map = new Map<string, OrderInfo[]>();
   for (const order of orders) {
     if (map.has(order.order.store_id.store_id)) {

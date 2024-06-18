@@ -30,7 +30,6 @@ export const useAddDrivers = routeAction$(async (body, context) => {
   const depot_id = await directusClient
     .findOrderByPlanId(`plans/${planId}`)
     .then((res) => {
-      console.log({ res });
       return res[0].order.store_id.depot_id;
     });
   const circuitsAPI = new CircuitAPI(apiKey as string);

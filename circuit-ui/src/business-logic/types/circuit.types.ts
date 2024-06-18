@@ -42,7 +42,7 @@ export type RouteResponse = {
   id: string;
   title: string;
   stopCount: number;
-  driver: any;
+  driver: string;
   state: {
     completed: boolean;
     completedAt: string;
@@ -121,7 +121,9 @@ export type StopObject = {
   notes?: string;
   webAppLink?: string;
   type?: string;
+  route?: RouteResponse;
 };
+
 
 export type ListStopsResponse = {
   stops: StopObject[];

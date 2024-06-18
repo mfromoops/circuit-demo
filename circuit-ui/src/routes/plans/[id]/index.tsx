@@ -7,6 +7,7 @@ import {
 } from "@builder.io/qwik-city";
 import type { StopObject } from "~/business-logic/types";
 import { CircuitAPI } from "~/business-logic/utils";
+import { DirectusClient } from "~/business-logic/utils/directus.utils";
 import { Button } from "~/components/ui/UIComponents";
 
 export const usePlan = routeLoader$(async ({ env, url }) => {
@@ -32,16 +33,41 @@ export const usePlan = routeLoader$(async ({ env, url }) => {
 export const useDistributePlan = routeAction$(async (_, { env, url }) => {
   const id = url.pathname.split("/")[2];
   const apiKey = env.get("CIRCUIT_API_KEY");
+  const directusToken = env.get("DIRECTUS_TOKEN");
+  const directus = new DirectusClient(directusToken as string);
   const circuitsAPI = new CircuitAPI(apiKey as string);
   let plan = await circuitsAPI.getPlan(`plans/${id}`);
   if (plan === undefined) {
     throw new Error("Plan not found");
   }
-  await circuitsAPI.distributePlan(`plans/${id}`);
+  circuitsAPI.distributePlan(`plans/${id}`);
   while (plan && !plan.distributed) {
     await new Promise((res) => setTimeout(res, 1500));
     plan = await circuitsAPI.getPlan(`plans/${id}`);
   }
+  if(plan === undefined) return undefined;
+  const stopsResponse = await circuitsAPI.listStops(`plans/${id}`);
+  const stops = stopsResponse.stops;
+  const promises = stops.map(async stop => {
+    
+    if(!stop.route || !stop.orderInfo || !stop.orderInfo.sellerOrderId) return Promise.reject();
+      const driver = await circuitsAPI.getDriver(stop.route.driver);
+      return Promise.resolve([stop.orderInfo.sellerOrderId, driver.name]);
+  });
+  
+  const drivers = (await Promise.allSettled(promises));
+  const map = new Map<string, string>();
+  drivers.forEach(d => {
+    if(d.status === 'fulfilled') {
+    map.set(d.value[0], d.value[1])
+  }
+  });
+  Array.from(map.keys()).forEach(async orderId => {
+    const driverName = map.get(orderId);
+    if(!driverName) return;
+    await directus.setDriverName(orderId, driverName);
+  });
+    
   return plan;
 });
 
@@ -53,6 +79,7 @@ export const useOptimizePlan = routeAction$(async (_, { env, url }) => {
   if (plan === undefined) {
     throw new Error("Plan not found");
   }
+  
   await circuitsAPI.optimizePlan(`plans/${id}`);
   while (plan && plan.optimization === "creating") {
     await new Promise((res) => setTimeout(res, 1500));

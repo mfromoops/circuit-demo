@@ -1,6 +1,7 @@
 import { BasicAuthentication } from ".";
 import type {
   DriverListResponse,
+  DriverObject,
   getPlanResponse as GetPlanResponse,
   ListPlansResponse,
   ListStopsResponse,
@@ -22,7 +23,7 @@ export class CircuitAPI {
       body: JSON.stringify(plan),
     }).then((res) => res.json());
   }
-  getDriver(driverID: string) {
+  getDriver(driverID: string): Promise<DriverObject> {
     return fetch("https://api.getcircuit.com/public/v0.2b/" + driverID, {
       method: "GET",
       headers: {
@@ -150,7 +151,6 @@ export class CircuitAPI {
       today[1].length == 1 ? "0" + today[1] : today[1],
     ].join("-");
     // [today[]].join("-");
-    console.log({ formattedDate });
 
     const res = await fetch(
       `https://api.getcircuit.com/public/v0.2b/plans?filter[startsGte]=${formattedDate}${token ? "&pageToken=" + token : ""}`,
@@ -162,7 +162,6 @@ export class CircuitAPI {
         },
       },
     ).then((res) => res.json());
-    console.log({ res });
     return res;
   }
 
@@ -213,7 +212,6 @@ export class CircuitAPI {
       drivers,
     } as Record<string, any>;
     if (depot_id) {
-      console.log({ depot_id });
       body.depot = depot_id;
     }
     return fetch(`https://api.getcircuit.com/public/v0.2b/${planID}`, {

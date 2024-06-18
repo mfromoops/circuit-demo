@@ -16,6 +16,7 @@ export type OrderInfo = {
   client_paid: boolean;
   routeId: string | null | undefined;
   planId: string | null | undefined;
+  driver_name: string | null | undefined;
 };
 export type Client = {
   id: string;
@@ -92,8 +93,28 @@ export class DirectusClient {
       }),
     );
   }
-  updateStore(store: Store) {
+  updateStore(store: Partial<Store> & { store_id: string }) {
     return this.client.request(updateItem("Stores", store.store_id, store));
+  }
+  setDriverName(orderId: string, driverName: string) {
+    this.client.request(readItems('order_info', {
+      fields: ['id'],
+      filter: {
+        order: {
+          Order_id: {
+            _eq: orderId
+          }
+        }
+      }
+    })).then(order_info => {
+      if(order_info.length === 0) return;
+      return this.client.request(
+        updateItem("order_info", order_info[0].id, {
+          driver_name: driverName,
+        }),
+      );
+
+    })
   }
   createStore(store: Store) {
     return this.client.request(createItem("Stores", store)).catch(() => {

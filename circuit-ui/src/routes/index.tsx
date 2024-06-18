@@ -47,7 +47,6 @@ export const useCreatePlan = routeAction$(async (data, { env, json }) => {
     month: date.getMonth() + 1,
     day: date.getDate() + 1,
   };
-  console.log({ starts });
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   await circuitsAPI.createPlan({
@@ -60,7 +59,6 @@ export const useCreatePlan = routeAction$(async (data, { env, json }) => {
 export const useDeleteAllPlans = routeAction$(async (body, { env, json }) => {
   const plansStr = body.plans as string;
   const allPlans = JSON.parse(plansStr) as PlanObject[];
-  console.log({ allPlans });
   const apiKey = env.get("CIRCUIT_API_KEY");
   const circuitsAPI = new CircuitAPI(apiKey as string);
   for (const plan of allPlans) {
